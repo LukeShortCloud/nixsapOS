@@ -2,8 +2,9 @@
 
 {
   boot.kernel.sysctl = {
-    # Increase the open files and memory mapping limits.
+    # Increase the open files limit for system processes.
     "fs.file-max" = 524288;
+    # Increase memory mapping limit.
     "vm.max_map_count" = 16777216;
     # Cache more writes in RAM for fewer writes to the drive.
     "vm.dirty_background_ratio" = 40;
@@ -16,6 +17,8 @@
     "vm.watermark_boost_factor" = 0;
     "vm.watermark_scale_factor" = 125;
   };
+  # Increase the open files limit for user processes.
+  systemd.user.extraConfig = "DefaultLimitNOFILE=524288";
   zramSwap = {
     algorithm = "lz4";
     enable = true;
