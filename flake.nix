@@ -9,6 +9,8 @@
     # Reusable NixOS modules. Other flakes can import these.
     nixosModules = {
       default = ./modules;
+      gaming = ./modules/features/gaming.nix;
+      graphics-foss = ./modules/features/graphics-foss.nix;
       portable-hardware = ./modules/features/portable-hardware.nix;
     };
 
