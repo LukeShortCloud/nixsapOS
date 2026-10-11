@@ -4,16 +4,13 @@
 {
   imports = [
     ./system/base.nix
+    ./system/boot.nix
     ./system/linux.nix
     ./system/networking.nix
     ./system/users.nix
   ];
 
-  # Placeholders so the configuration evaluates. These are replaced in later steps.
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixsapos-root";
-    fsType = "btrfs";
-  };
+  # Placeholder so the configuration evaluates.
   boot.loader.grub.enable = false;
 
   system.stateVersion = "26.05";
