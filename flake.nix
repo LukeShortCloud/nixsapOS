@@ -9,6 +9,7 @@
     # Reusable NixOS modules. Other flakes can import these.
     nixosModules = {
       default = ./modules;
+      portable-hardware = ./modules/features/portable-hardware.nix;
     };
 
     # A complete nixsapOS system built from the modules above.
