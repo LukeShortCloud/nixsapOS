@@ -2,6 +2,10 @@
 { ... }:
 
 {
+  imports = [
+    ./system/base.nix
+  ];
+
   # Placeholders so the configuration evaluates. These are replaced in later steps.
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixsapos-root";
