@@ -1,6 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
+  # Use the newest kernel for the best support of new hardware.
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
     # Never suspend USB devices, including the drive nixsapOS runs from.
     "usbcore.autosuspend=-1"
