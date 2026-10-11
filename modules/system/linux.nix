@@ -1,6 +1,14 @@
 { ... }:
 
 {
+  boot.kernelParams = [
+    # Never suspend USB devices, including the drive nixsapOS runs from.
+    "usbcore.autosuspend=-1"
+    # Poll controllers, keyboards, and mice every 1 ms for lower input latency.
+    "usbhid.jspoll=1"
+    "usbhid.kbpoll=1"
+    "usbhid.mousepoll=1"
+  ];
   boot.kernel.sysctl = {
     # Increase the open files limit for system processes.
     "fs.file-max" = 524288;
