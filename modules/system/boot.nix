@@ -17,4 +17,9 @@
   };
   # Use RAM for temporary files for fewer writes to the drive.
   boot.tmp.useTmpfs = true;
+
+  # Use systemd-boot instead of GRUB.
+  boot.loader.systemd-boot.enable = true;
+  # Make systemd-boot more portable.
+  boot.loader.efi.canTouchEfiVariables = false;
 }
