@@ -4,6 +4,7 @@
 {
   imports = [
     ./system/base.nix
+    ./system/users.nix
   ];
 
   # Placeholders so the configuration evaluates. These are replaced in later steps.
