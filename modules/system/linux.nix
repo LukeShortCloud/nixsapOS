@@ -1,4 +1,3 @@
-# Use "linux.nix" for configuring Linux kernel related settings.
 { ... }:
 
 {

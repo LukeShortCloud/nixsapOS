@@ -1,4 +1,3 @@
-# Use "users.nix" for configuring the default user account.
 { ... }:
 
 {

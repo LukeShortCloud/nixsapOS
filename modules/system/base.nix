@@ -1,4 +1,3 @@
-# Use "base.nix" for configuring the default system identity.
 { ... }:
 
 {

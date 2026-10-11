@@ -1,4 +1,3 @@
-# Use "networking.nix" for configuring network management and remote access.
 { pkgs, ... }:
 
 {
