@@ -4,6 +4,7 @@
 {
   imports = [
     ./system/base.nix
+    ./system/networking.nix
     ./system/users.nix
   ];
 
