@@ -21,5 +21,8 @@
         self.nixosModules.default
       ];
     };
+
+    # Each reusable module must work on any NixOS system.
+    checks.x86_64-linux = import ./checks { inherit self nixpkgs; };
   };
 }
