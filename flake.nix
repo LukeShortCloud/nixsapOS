@@ -21,7 +21,15 @@
       modules = [
         self.nixosModules.default
         self.nixosModules.image
+        { nixsapos.image.flake = self; }
       ];
+    };
+
+    # The flake installed to /etc/nixos. Start a new one with `nix flake init -t github:LukeShortCloud/nixsapOS`.
+    templates.default = {
+      path = ./templates/host;
+      description = "A nixsapOS system";
+      welcomeText = "Add your own changes to configuration.nix. Apply them by running `sudo nixos-rebuild switch --flake .` in this directory.";
     };
 
     # Build the flashable raw disk image in output/ as root, in a privileged container: `nix run .#nixsapos-build`.

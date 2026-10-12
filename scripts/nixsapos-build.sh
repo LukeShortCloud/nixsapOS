@@ -30,6 +30,10 @@ mount -o compress=zstd:2,noatime "${loop_device}p2" "${mount_dir}"
 mkdir "${mount_dir}/boot"
 mount -o umask=0077 "${loop_device}p1" "${mount_dir}/boot"
 
+# The flake that the installed system rebuilds from.
+mkdir -p "${mount_dir}/etc"
+cp --recursive --no-preserve=mode "${NIXSAPOS_HOST_FLAKE}" "${mount_dir}/etc/nixos"
+
 # Install the system the same way as on a real computer, including the bootloader.
 nixos-install \
     --root "${mount_dir}" \
