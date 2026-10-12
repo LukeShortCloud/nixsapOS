@@ -20,6 +20,7 @@
   nixsapos.generations.enable = true;
   nixsapos.graphicsFoss.enable = true;
   nixsapos.plasma.enable = true;
+  nixsapos.plasma.passwordlessLogin = true;
   nixsapos.portableHardware.enable = true;
 
   # `nh os switch` rebuilds from the flake installed in the image.
