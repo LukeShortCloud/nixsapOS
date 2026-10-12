@@ -8,6 +8,7 @@ in
   # Build the image with systemd-repart. It runs as a normal Nix build without a virtual machine.
   imports = [
     "${modulesPath}/image/repart.nix"
+    ./build.nix
     ./first-boot.nix
   ];
 

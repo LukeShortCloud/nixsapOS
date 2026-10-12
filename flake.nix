@@ -28,6 +28,8 @@
     packages.x86_64-linux = rec {
       image = self.nixosConfigurations.nixsapos.config.system.build.image;
       default = image;
+      # Build the image in output/ as root, in a privileged container: `nix run .#nixsapos-build`.
+      nixsapos-build = self.nixosConfigurations.nixsapos.config.system.build.nixsaposBuild;
     };
 
     # Each reusable module must work on any NixOS system.

@@ -1,4 +1,5 @@
 FROM docker.io/nixos/nix:2.34.8
 
 RUN echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf \
-    && echo "sandbox = true" >> /etc/nix/nix.conf
+    && echo "sandbox = true" >> /etc/nix/nix.conf \
+    && git config --global --add safe.directory /workdir
