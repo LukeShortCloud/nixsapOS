@@ -13,5 +13,8 @@ in
     # Load CPU microcode updates for both vendors. The kernel only loads the one that matches the CPU.
     hardware.cpu.amd.updateMicrocode = true;
     hardware.cpu.intel.updateMicrocode = true;
+
+    # Bluetooth with the adapter powered on at boot. Plasma adds its Bluetooth settings and applet when this is on.
+    hardware.bluetooth.enable = true;
   };
 }
