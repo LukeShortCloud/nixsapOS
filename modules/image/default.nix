@@ -6,7 +6,10 @@ let
 in
 {
   # Build the image with systemd-repart. It runs as a normal Nix build without a virtual machine.
-  imports = [ "${modulesPath}/image/repart.nix" ];
+  imports = [
+    "${modulesPath}/image/repart.nix"
+    ./first-boot.nix
+  ];
 
   # Partition definitions shared by the image build (image.repart) and the first boot (systemd.repart).
   options.nixsapos.image.partitions = lib.mkOption {
