@@ -37,6 +37,12 @@ in
       partitions = lib.mkMerge [
         (lib.mapAttrs (name: settings: { repartConfig = settings; }) config.nixsapos.image.partitions)
         {
+          # systemd-boot at the fallback path that UEFI firmware boots from removable drives.
+          # It finds the unified kernel image (kernel, initrd, and kernel parameters in one file) on its own.
+          "10-esp".contents = {
+            "/EFI/BOOT/BOOTX64.EFI".source = "${config.systemd.package}/lib/systemd/boot/efi/systemd-bootx64.efi";
+            "/EFI/Linux/nixsapos-initial.efi".source = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
+          };
           # Only at build time: install the system and make root as small as possible.
           # The first boot grows it to fill the drive.
           "20-root" = {
