@@ -24,13 +24,8 @@
       ];
     };
 
-    # The flashable raw disk image. Build it with `nix build .#image`.
-    packages.x86_64-linux = rec {
-      image = self.nixosConfigurations.nixsapos.config.system.build.image;
-      default = image;
-      # Build the image in output/ as root, in a privileged container: `nix run .#nixsapos-build`.
-      nixsapos-build = self.nixosConfigurations.nixsapos.config.system.build.nixsaposBuild;
-    };
+    # Build the flashable raw disk image in output/ as root, in a privileged container: `nix run .#nixsapos-build`.
+    packages.x86_64-linux.nixsapos-build = self.nixosConfigurations.nixsapos.config.system.build.nixsaposBuild;
 
     # Each reusable module must work on any NixOS system.
     checks.x86_64-linux = import ./checks { inherit self nixpkgs; };
