@@ -4,6 +4,7 @@
 {
   imports = [
     ./features/gaming.nix
+    ./features/generations.nix
     ./features/graphics-foss.nix
     ./features/portable-hardware.nix
     ./system/base.nix
@@ -14,8 +15,12 @@
   ];
 
   nixsapos.gaming.enable = true;
+  nixsapos.generations.enable = true;
   nixsapos.graphicsFoss.enable = true;
   nixsapos.portableHardware.enable = true;
+
+  # `nh os switch` rebuilds from the flake installed in the image.
+  programs.nh.flake = "/etc/nixos";
 
   system.stateVersion = "26.05";
 }

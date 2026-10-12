@@ -28,6 +28,10 @@ in
     self.nixosModules.gaming
     { nixsapos.gaming.enable = true; }
   ];
+  generations = checkModules "generations" [
+    self.nixosModules.generations
+    { nixsapos.generations.enable = true; }
+  ];
   graphics-foss = checkModules "graphics-foss" [
     self.nixosModules.graphics-foss
     { nixsapos.graphicsFoss.enable = true; }
