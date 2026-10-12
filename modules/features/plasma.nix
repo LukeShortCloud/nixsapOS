@@ -23,6 +23,10 @@ in
         settings.General.DisplayServer = "wayland";
       };
 
+      # PipeWire gets installed automatically as part of Plasma.
+      # Use real-time priority to avoid audio crackling.
+      security.rtkit.enable = lib.mkDefault config.services.pipewire.enable;
+
       # Phone integration. This also opens the firewall ports it needs.
       programs.kdeconnect.enable = true;
     }
