@@ -10,15 +10,19 @@
   system.build.nixsaposBuild = pkgs.writeShellApplication {
     name = "nixsapos-build";
     runtimeInputs = [
+      config.nix.package
+      config.system.build.nixos-install
       config.systemd.package
       pkgs.btrfs-progs
       pkgs.coreutils
       pkgs.dosfstools
+      pkgs.util-linux
     ];
     runtimeEnv = {
       NIXSAPOS_CLOSURE_INFO = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel ]; };
       NIXSAPOS_ESP_SIZE = config.nixsapos.image.partitions."10-esp".SizeMaxBytes;
       NIXSAPOS_PARTITIONS = config.system.build.nixsaposPartitions;
+      NIXSAPOS_TOPLEVEL = config.system.build.toplevel;
     };
     text = builtins.readFile ../../scripts/nixsapos-build.sh;
   };

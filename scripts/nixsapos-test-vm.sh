@@ -3,7 +3,7 @@
 # This is for local testing only. Building the image never uses a virtual machine.
 #
 # Usage: scripts/nixsapos-test-vm.sh [IMAGE]
-#   IMAGE defaults to result/nixsapos.raw from `nix build .#image`.
+#   IMAGE defaults to output/nixsapos.img from `nix run .#nixsapos-build`.
 # Environment variables:
 #   NIXSAPOS_VM_DIR        Where the disk copy and UEFI variables are stored (default: vm/).
 #   NIXSAPOS_VM_DISK_SIZE  Size of the virtual drive, to test growing the root partition (default: 32G).
@@ -13,7 +13,7 @@
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-image="${1:-${repo_dir}/result/nixsapos.raw}"
+image="${1:-${repo_dir}/output/nixsapos.img}"
 vm_dir="${NIXSAPOS_VM_DIR:-${repo_dir}/vm}"
 disk_size="${NIXSAPOS_VM_DISK_SIZE:-32G}"
 memory="${NIXSAPOS_VM_MEMORY:-4G}"
