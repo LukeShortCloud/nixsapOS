@@ -29,9 +29,10 @@ in
   config = lib.mkMerge [
     {
       # The partition definitions as repart.d(5) files, the same format as /etc/repart.d.
+      # Only at build time: all-zero partition UUIDs, which the first boot replaces with unique ones.
       system.build.nixsaposPartitions = utils.systemdUtils.lib.definitions "repart.d"
         (pkgs.formats.ini { listsAsDuplicateKeys = true; })
-        (lib.mapAttrs (name: settings: { Partition = settings; }) config.nixsapos.image.partitions);
+        (lib.mapAttrs (name: settings: { Partition = settings // { UUID = "null"; }; }) config.nixsapos.image.partitions);
     }
     (lib.mkIf (flake != null) {
       # Keep the nixsapOS source in every generation so /etc/nixos can always rebuild offline.
