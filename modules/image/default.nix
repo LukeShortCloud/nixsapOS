@@ -5,7 +5,10 @@ let
   repartValue = with lib.types; oneOf [ str int bool (listOf str) ];
 in
 {
-  imports = [ ./build.nix ];
+  imports = [
+    ./build.nix
+    ./first-boot.nix
+  ];
 
   # Partition definitions shared by the image build and the first boot (systemd.repart).
   options.nixsapos.image.partitions = lib.mkOption {
