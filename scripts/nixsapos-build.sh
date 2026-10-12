@@ -1,7 +1,7 @@
 output_dir="output"
 image="${output_dir}/nixsapos.img"
 
-# The installed system plus 25% for file system overhead.
+# The installed system plus 25% for file system overhead. The root partition shrinks to fit at the end.
 nar_size="$(cat "${NIXSAPOS_CLOSURE_INFO}/total-nar-size")"
 root_size="$(( nar_size * 5 / 4 ))"
 esp_size="$(numfmt --from=iec "${NIXSAPOS_ESP_SIZE}")"
@@ -17,35 +17,60 @@ systemd-repart \
     "${image}"
 
 loop_device="$(losetup --find --show --partscan "${image}")"
-mount_dir="$(mktemp -d)"
+# Install into a directory first. The root file system is created from it at the end.
+root_dir="$(mktemp -d)"
+chmod 755 "${root_dir}"
 cleanup() {
-    umount --recursive "${mount_dir}" || true
+    umount --recursive "${root_dir}/boot" || true
     losetup --detach "${loop_device}" || true
-    rmdir "${mount_dir}" || true
+    # NixOS makes /var/empty immutable.
+    chattr -i "${root_dir}/var/empty" 2>/dev/null || true
+    rm -rf --one-file-system "${root_dir}"
 }
 trap cleanup EXIT
 
-# Mount by partition instead of by label, in case the build host has a nixsapOS drive attached.
-mount -o compress=zstd:2,noatime "${loop_device}p2" "${mount_dir}"
-mkdir "${mount_dir}/boot"
-mount -o umask=0077 "${loop_device}p1" "${mount_dir}/boot"
+# Mount the boot partition by partition instead of by label, in case the build host has a nixsapOS drive attached.
+mkdir "${root_dir}/boot"
+mount -o umask=0077 "${loop_device}p1" "${root_dir}/boot"
 
 # The flake that the installed system rebuilds from.
-mkdir -p "${mount_dir}/etc"
-cp --recursive --no-preserve=mode "${NIXSAPOS_HOST_FLAKE}" "${mount_dir}/etc/nixos"
+mkdir "${root_dir}/etc"
+cp --recursive --no-preserve=mode "${NIXSAPOS_HOST_FLAKE}" "${root_dir}/etc/nixos"
 
 # Install the system the same way as on a real computer, including the bootloader.
 nixos-install \
-    --root "${mount_dir}" \
+    --root "${root_dir}" \
     --system "${NIXSAPOS_TOPLEVEL}" \
     --no-root-passwd \
     --no-channel-copy
 # ⚠️ Every flashed drive would share this boot loader random seed (see `bootctl --random-seed=no`).
 # systemd-boot-random-seed.service creates a new one on the first boot.
-rm "${mount_dir}/boot/loader/random-seed"
+rm "${root_dir}/boot/loader/random-seed"
+umount "${root_dir}/boot"
+
+# Create the smallest possible root file system from the installed files. The first boot grows it to fill the drive.
+mkfs.btrfs \
+    --force \
+    --label "${NIXSAPOS_ROOT_LABEL}" \
+    --compress "${NIXSAPOS_ROOT_COMPRESSION}" \
+    --rootdir "${root_dir}" \
+    --shrink \
+    "${loop_device}p2"
+root_fs_size="$(btrfs inspect-internal dump-super "${loop_device}p2" | awk '$1 == "total_bytes" { print $2 }')"
 
 cleanup
 trap - EXIT
+
+# Shrink the root partition to match, in whole MiB.
+mib=1048576
+root_sectors="$(( (root_fs_size + mib - 1) / mib * mib / 512 ))"
+printf ',%s\n' "${root_sectors}" | sfdisk --quiet -N 2 "${image}"
+# End the image 1 MiB after root, which leaves room for the backup partition table.
+# Write the table again so that the backup table and the protective MBR match the new size.
+root_start="$(partx -g -o START -n 2 "${image}" | tr -d ' ')"
+partition_table="$(sfdisk --dump "${image}" | grep -v -E '^(first-lba|last-lba):')"
+truncate -s "$(( (root_start + root_sectors) * 512 + mib ))" "${image}"
+echo "${partition_table}" | sfdisk --quiet "${image}"
 
 # Give the output to the owner of the repository instead of root.
 chown --recursive --reference=. "${output_dir}"

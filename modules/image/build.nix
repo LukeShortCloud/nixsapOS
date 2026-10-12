@@ -54,6 +54,9 @@ in
           pkgs.btrfs-progs
           pkgs.coreutils
           pkgs.dosfstools
+          pkgs.e2fsprogs
+          pkgs.gawk
+          pkgs.gnugrep
           pkgs.util-linux
         ];
         runtimeEnv = {
@@ -61,6 +64,10 @@ in
           NIXSAPOS_ESP_SIZE = config.nixsapos.image.partitions."10-esp".SizeMaxBytes;
           NIXSAPOS_HOST_FLAKE = config.system.build.nixsaposHostFlake;
           NIXSAPOS_PARTITIONS = config.system.build.nixsaposPartitions;
+          # The same compression as the root mount options, for example "zstd:2".
+          NIXSAPOS_ROOT_COMPRESSION = lib.removePrefix "compress="
+            (lib.findFirst (lib.hasPrefix "compress=") "compress=no" config.fileSystems."/".options);
+          NIXSAPOS_ROOT_LABEL = config.nixsapos.image.partitions."20-root".Label;
           NIXSAPOS_TOPLEVEL = config.system.build.toplevel;
         };
         text = builtins.readFile ../../scripts/nixsapos-build.sh;
