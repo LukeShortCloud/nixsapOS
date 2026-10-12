@@ -36,6 +36,10 @@ in
     self.nixosModules.graphics-foss
     { nixsapos.graphicsFoss.enable = true; }
   ];
+  plasma = checkModules "plasma" [
+    self.nixosModules.plasma
+    { nixsapos.plasma.enable = true; }
+  ];
   portable-hardware = checkModules "portable-hardware" [
     self.nixosModules.portable-hardware
     { nixsapos.portableHardware.enable = true; }

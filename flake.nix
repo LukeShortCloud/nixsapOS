@@ -13,6 +13,7 @@
       generations = ./modules/features/generations.nix;
       graphics-foss = ./modules/features/graphics-foss.nix;
       image = ./modules/image;
+      plasma = ./modules/features/plasma.nix;
       portable-hardware = ./modules/features/portable-hardware.nix;
     };
 

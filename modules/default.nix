@@ -6,9 +6,11 @@
     ./features/gaming.nix
     ./features/generations.nix
     ./features/graphics-foss.nix
+    ./features/plasma.nix
     ./features/portable-hardware.nix
     ./system/base.nix
     ./system/boot.nix
+    ./system/desktop.nix
     ./system/linux.nix
     ./system/networking.nix
     ./system/users.nix
@@ -17,6 +19,7 @@
   nixsapos.gaming.enable = true;
   nixsapos.generations.enable = true;
   nixsapos.graphicsFoss.enable = true;
+  nixsapos.plasma.enable = true;
   nixsapos.portableHardware.enable = true;
 
   # `nh os switch` rebuilds from the flake installed in the image.
