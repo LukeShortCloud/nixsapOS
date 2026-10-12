@@ -11,6 +11,7 @@
       default = ./modules;
       gaming = ./modules/features/gaming.nix;
       graphics-foss = ./modules/features/graphics-foss.nix;
+      image = ./modules/image;
       portable-hardware = ./modules/features/portable-hardware.nix;
     };
 
@@ -19,6 +20,7 @@
       system = "x86_64-linux";
       modules = [
         self.nixosModules.default
+        self.nixosModules.image
       ];
     };
 
