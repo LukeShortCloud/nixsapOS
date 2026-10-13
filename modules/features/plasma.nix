@@ -29,6 +29,18 @@ in
 
       # Phone integration. This also opens the firewall ports it needs.
       programs.kdeconnect.enable = true;
+
+      # Add AppImage support.
+      # binfmt runs AppImages directly (./app.AppImage) through appimage-run.
+      programs.appimage.enable = true;
+      programs.appimage.binfmt = true;
+
+      # Add Flatpak support. Plasma already provides the XDG desktop portals (KDE and GTK) that Flatpak needs.
+      # It also adds Discover and the Flatpak settings page when Flatpak is enabled.
+      services.flatpak.enable = true;
+      # Add the Flathub remote without a network connection or first-boot service.
+      # Flatpak adds every remote in this directory when it creates the system installation.
+      environment.etc."flatpak/remotes.d/flathub.flatpakrepo".source = ../../rootfs/etc/flatpak/remotes.d/flathub.flatpakrepo;
     }
     (lib.mkIf cfg.passwordlessLogin {
       users.groups.nopasswdlogin = { };
