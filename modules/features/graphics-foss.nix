@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.nixsapos.graphicsFoss;
@@ -9,6 +9,12 @@ in
   config = lib.mkIf cfg.enable {
     # Mesa provides OpenGL and Vulkan for AMD, Intel, and NVIDIA (Nouveau and NVK).
     hardware.graphics.enable = true;
+
+    # Show which graphics driver is in use: vulkaninfo, vkcube, glxinfo, eglinfo, and glxgears.
+    environment.systemPackages = [
+      pkgs.mesa-demos
+      pkgs.vulkan-tools
+    ];
 
     assertions = [
       {
