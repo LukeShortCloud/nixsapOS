@@ -1,0 +1,27 @@
+name: Image
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build the image
+    runs-on: ubuntu-24.04
+    steps:
+      # The build needs over 20 GB.
+      - name: Free disk space
+        # Skip this when testing locally with act, which sets ACT and mounts its own tool cache.
+        if: ${{ !env.ACT }}
+        run: |
+          df -h /
+          sudo rm -rf /opt/ghc /opt/hostedtoolcache /usr/local/lib/android /usr/share/dotnet
+          df -h /
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The same commands as a local build with Docker (see CONTRIBUTING.md).
+      - name: Create the builder container image
+        run: docker build -t nixsapos-builder -f build/Containerfile build/
+      - name: Build the image
+        run: docker run --rm --privileged -v /dev:/dev -v nixsapos-nix:/nix -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix run .#nixsapos-build
+      - name: Show the image
+        run: ls -lh output/
