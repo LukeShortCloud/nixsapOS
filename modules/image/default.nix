@@ -7,6 +7,7 @@ in
 {
   imports = [
     ./build.nix
+    ./drive.nix
     ./first-boot.nix
   ];
 
