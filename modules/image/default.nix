@@ -25,6 +25,9 @@ in
       Label = "NXS-EFI";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
+      # Use 512-byte sectors.
+      # Older UEFI firmware cannot read FAT32 partitions with the modern default of 4096 bytes.
+      FileSystemSectorSize = 512;
     };
     "20-root" = {
       Type = "root";
