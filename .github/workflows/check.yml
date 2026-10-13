@@ -1,0 +1,17 @@
+name: Check
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  check:
+    name: Nix flake check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Use the same container and Nix version as local builds.
+      - name: Create the builder container image
+        run: docker build -t nixsapos-builder -f build/Containerfile build/
+      # Evaluate every output and run the reusable module checks. This does not build the image.
+      - name: Check the flake
+        run: docker run --rm -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix flake check
