@@ -12,6 +12,7 @@
         nixsapos.nixosModules.image
         { nixsapos.image.flake = nixsapos; }
         ./configuration.nix
+        ./image.nix
       ];
     };
   };

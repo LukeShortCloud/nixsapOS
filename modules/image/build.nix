@@ -18,6 +18,13 @@ let
       nixpkgs = (lib.importJSON "${flake}/flake.lock").nodes.nixpkgs;
     };
   };
+  # The same settings as templates/host/image.nix, with the values of this image.
+  imageSettings = pkgs.writeText "image.nix" ''
+    # Settings that must match the image this system was installed from. Changing them can make it unbootable.
+    {
+      nixsapos.image.encryption.enable = ${lib.boolToString config.nixsapos.image.encryption.enable};
+    }
+  '';
 in
 {
   options.nixsapos.image.flake = lib.mkOption {
@@ -38,10 +45,11 @@ in
       # Keep the nixsapOS source in every generation so /etc/nixos can always rebuild offline.
       system.extraDependencies = [ flake.outPath ];
 
-      # The host flake copied to /etc/nixos: the template plus its lock file.
+      # The host flake copied to /etc/nixos: the template plus its lock file and the image settings.
       system.build.nixsaposHostFlake = pkgs.runCommand "nixsapos-host-flake" { } ''
         cp --recursive --no-preserve=mode ${template} $out
         cp ${pkgs.writeText "flake.lock" (builtins.toJSON hostLock)} $out/flake.lock
+        cp ${imageSettings} $out/image.nix
       '';
 
       # The image build script. It needs root for loop devices, so it runs in a privileged container.
@@ -63,10 +71,12 @@ in
           NIXSAPOS_CLOSURE_INFO = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel ]; };
           NIXSAPOS_ESP_SIZE = config.nixsapos.image.partitions."10-esp".SizeMaxBytes;
           NIXSAPOS_HOST_FLAKE = config.system.build.nixsaposHostFlake;
+          NIXSAPOS_IMAGE_NAME = "nixsapos" + lib.optionalString config.nixsapos.image.encryption.enable "-encrypted";
           NIXSAPOS_PARTITIONS = config.system.build.nixsaposPartitions;
           # The same compression as the root mount options, for example "zstd:2".
           NIXSAPOS_ROOT_COMPRESSION = lib.removePrefix "compress="
             (lib.findFirst (lib.hasPrefix "compress=") "compress=no" config.fileSystems."/".options);
+          NIXSAPOS_ROOT_ENCRYPT = config.nixsapos.image.partitions."20-root".Encrypt or "off";
           NIXSAPOS_ROOT_LABEL = config.nixsapos.image.partitions."20-root".Label;
           NIXSAPOS_TOPLEVEL = config.system.build.toplevel;
         };

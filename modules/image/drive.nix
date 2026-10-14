@@ -34,9 +34,10 @@ in
     path = [ pkgs.exfatprogs pkgs.gawk pkgs.util-linux ];
     script = ''
       # Only look at the drive that the root file system is on, not other attached drives.
-      root_partition="$(findmnt --noheadings --nofsroot --output SOURCE --target /)"
-      root_disk="$(lsblk --nodeps --noheadings --output PKNAME "$root_partition")"
-      drive_partition="$(lsblk --list --noheadings --paths --output NAME,PARTLABEL "/dev/$root_disk" | awk '$2 == "${label}" { print $1 }')"
+      root_device="$(findmnt --noheadings --nofsroot --output SOURCE --target /)"
+      # Walk up from the root device to its disk, also through LUKS2 (nixsapos.image.encryption).
+      root_disk="$(lsblk --inverse --list --noheadings --paths --output NAME,TYPE "$root_device" | awk '$2 == "disk" { print $1 }')"
+      drive_partition="$(lsblk --list --noheadings --paths --output NAME,PARTLABEL "$root_disk" | awk '$2 == "${label}" { print $1 }')"
       if [ -z "$drive_partition" ]; then
         echo "There is no ${label} partition."
         exit 0

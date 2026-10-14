@@ -26,6 +26,10 @@
         { nixsapos.image.flake = self; }
       ];
     };
+    # The same system with an encrypted root partition.
+    nixosConfigurations.nixsapos-encrypted = self.nixosConfigurations.nixsapos.extendModules {
+      modules = [ { nixsapos.image.encryption.enable = true; } ];
+    };
 
     # The flake installed to /etc/nixos. Start a new one with `nix flake init -t github:LukeShortCloud/nixsapOS`.
     templates.default = {
@@ -36,6 +40,8 @@
 
     # Build the flashable raw disk image in output/ as root, in a privileged container: `nix run .#nixsapos-build`.
     packages.x86_64-linux.nixsapos-build = self.nixosConfigurations.nixsapos.config.system.build.nixsaposBuild;
+    # The encrypted image in output/nixsapos-encrypted.img: `nix run .#nixsapos-build-encrypted`.
+    packages.x86_64-linux.nixsapos-build-encrypted = self.nixosConfigurations.nixsapos-encrypted.config.system.build.nixsaposBuild;
 
     # Each reusable module must work on any NixOS system.
     checks.x86_64-linux = import ./checks { inherit self nixpkgs; };

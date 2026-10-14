@@ -8,6 +8,7 @@ in
   imports = [
     ./build.nix
     ./drive.nix
+    ./encryption.nix
     ./first-boot.nix
   ];
 

@@ -1,5 +1,5 @@
 output_dir="output"
-image="${output_dir}/nixsapos.img"
+image="${output_dir}/${NIXSAPOS_IMAGE_NAME}.img"
 
 # The installed system plus 25% for file system overhead. The root partition shrinks to fit at the end.
 nar_size="$(cat "${NIXSAPOS_CLOSURE_INFO}/total-nar-size")"
@@ -17,11 +17,19 @@ systemd-repart \
     "${image}"
 
 loop_device="$(losetup --find --show --partscan "${image}")"
+root_partition="${loop_device}p2"
+# The device that holds the root file system: the partition, or the opened LUKS2 volume inside it.
+root_device="${root_partition}"
+# A name that can't clash with a LUKS2 volume on the build host.
+root_mapper="nixsapos-build-$$"
 # Install into a directory first. The root file system is created from it at the end.
 root_dir="$(mktemp -d)"
 chmod 755 "${root_dir}"
 cleanup() {
     umount --recursive "${root_dir}/boot" || true
+    if [[ -e "/dev/mapper/${root_mapper}" ]]; then
+        systemd-cryptsetup detach "${root_mapper}" || true
+    fi
     losetup --detach "${loop_device}" || true
     # NixOS makes /var/empty immutable.
     chattr -i "${root_dir}/var/empty" 2>/dev/null || true
@@ -48,6 +56,14 @@ nixos-install \
 rm "${root_dir}/boot/loader/random-seed"
 umount "${root_dir}/boot"
 
+if [[ "${NIXSAPOS_ROOT_ENCRYPT}" != "off" ]]; then
+    # systemd-repart encrypted the root partition with an empty password. Open it the same way as the boot does.
+    systemd-cryptsetup attach "${root_mapper}" "${root_partition}" - try-empty-password=yes,headless=yes
+    root_device="/dev/mapper/${root_mapper}"
+fi
+# The space in front of the file system: the LUKS2 header, or nothing.
+root_header_size="$(( $(blockdev --getsize64 "${root_partition}") - $(blockdev --getsize64 "${root_device}") ))"
+
 # Create the smallest possible root file system from the installed files. The first boot grows it to fill the drive.
 mkfs.btrfs \
     --force \
@@ -55,15 +71,15 @@ mkfs.btrfs \
     --compress "${NIXSAPOS_ROOT_COMPRESSION}" \
     --rootdir "${root_dir}" \
     --shrink \
-    "${loop_device}p2"
-root_fs_size="$(btrfs inspect-internal dump-super "${loop_device}p2" | awk '$1 == "total_bytes" { print $2 }')"
+    "${root_device}"
+root_fs_size="$(btrfs inspect-internal dump-super "${root_device}" | awk '$1 == "total_bytes" { print $2 }')"
 
 cleanup
 trap - EXIT
 
 # Shrink the root partition to match, in whole MiB.
 mib=1048576
-root_sectors="$(( (root_fs_size + mib - 1) / mib * mib / 512 ))"
+root_sectors="$(( (root_header_size + root_fs_size + mib - 1) / mib * mib / 512 ))"
 printf ',%s\n' "${root_sectors}" | sfdisk --quiet -N 2 "${image}"
 # End the image 1 MiB after root, which leaves room for the backup partition table.
 # Write the table again so that the backup table and the protective MBR match the new size.
