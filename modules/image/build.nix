@@ -61,6 +61,7 @@ in
           config.systemd.package
           pkgs.btrfs-progs
           pkgs.coreutils
+          pkgs.cryptsetup
           pkgs.dosfstools
           pkgs.e2fsprogs
           pkgs.gawk
@@ -76,6 +77,7 @@ in
           # The same compression as the root mount options, for example "zstd:2".
           NIXSAPOS_ROOT_COMPRESSION = lib.removePrefix "compress="
             (lib.findFirst (lib.hasPrefix "compress=") "compress=no" config.fileSystems."/".options);
+          NIXSAPOS_ROOT_EMPTY_PASSWORD_MARKER = config.nixsapos.image.encryption.emptyPasswordMarker;
           NIXSAPOS_ROOT_ENCRYPT = config.nixsapos.image.partitions."20-root".Encrypt or "off";
           NIXSAPOS_ROOT_LABEL = config.nixsapos.image.partitions."20-root".Label;
           NIXSAPOS_TOPLEVEL = config.system.build.toplevel;

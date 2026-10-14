@@ -57,7 +57,13 @@ rm "${root_dir}/boot/loader/random-seed"
 umount "${root_dir}/boot"
 
 if [[ "${NIXSAPOS_ROOT_ENCRYPT}" != "off" ]]; then
-    # systemd-repart encrypted the root partition with an empty password. Open it the same way as the boot does.
+    # systemd-repart encrypted the root partition with an empty password. Mark it so the first boot asks for a new one.
+    # `cryptsetup config` always sets both the label and the subsystem, so keep the label.
+    cryptsetup config \
+        --label "$(blkid --probe --match-tag LABEL --output value "${root_partition}")" \
+        --subsystem "${NIXSAPOS_ROOT_EMPTY_PASSWORD_MARKER}" \
+        "${root_partition}"
+    # Open it the same way as the boot does.
     systemd-cryptsetup attach "${root_mapper}" "${root_partition}" - try-empty-password=yes,headless=yes
     root_device="/dev/mapper/${root_mapper}"
 fi
