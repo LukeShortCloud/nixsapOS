@@ -23,6 +23,8 @@
         self.nixosModules.default
         self.nixosModules.image
         { nixsapos.image.flake = self; }
+        # The same file that the image installs to /etc/nixos.
+        ./templates/host/configuration.nix
       ];
     };
     # The same system with an encrypted root partition.

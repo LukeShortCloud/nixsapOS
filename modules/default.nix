@@ -19,6 +19,4 @@
   nixsapos.plasma.enable = true;
   nixsapos.plasma.passwordlessLogin = true;
   nixsapos.portableHardware.enable = true;
-
-  system.stateVersion = "26.05";
 }
