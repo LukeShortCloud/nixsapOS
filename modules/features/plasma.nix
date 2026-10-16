@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.nixsapos.plasma;
@@ -41,6 +41,12 @@ in
       # Add the Flathub remote without a network connection or first-boot service.
       # Flatpak adds every remote in this directory when it creates the system installation.
       environment.etc."flatpak/remotes.d/flathub.flatpakrepo".source = ../../rootfs/etc/flatpak/remotes.d/flathub.flatpakrepo;
+
+      # The Plasma meta package does not provide any web browser.
+      programs.firefox = {
+          enable = true;
+          package = pkgs.firefox-esr;
+      };
     }
     (lib.mkIf cfg.passwordlessLogin {
       users.groups.nopasswdlogin = { };

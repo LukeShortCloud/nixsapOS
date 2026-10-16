@@ -1,5 +1,5 @@
 # The nixsapOS profile: distro-specific settings. Exported as `nixosModules.default`.
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -19,4 +19,9 @@
   nixsapos.plasma.enable = true;
   nixsapos.plasma.passwordlessLogin = true;
   nixsapos.portableHardware.enable = true;
+
+  # git is required for some NixOS operations.
+  programs.git.enable = true;
+  # vim is provided as an alternative to the default nano text editor.
+  programs.vim.enable = true;
 }

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   # Settings for this computer. They stay the same when switching to another NixOS-based distribution.
@@ -23,6 +23,10 @@
   system.stateVersion = "26.05";
   # Whether the drive was flashed from the encrypted image. Never change it, or the drive won't boot.
   nixsapos.image.encryption.enable = false;
+
+  # sshd.service is installed but not enabled by default.
+  services.openssh.enable = true;
+  systemd.services.sshd.wantedBy = lib.mkForce [ ];
 
   # Add your own changes here. For example, to install more packages:
   # environment.systemPackages = [ pkgs.firefox ];
