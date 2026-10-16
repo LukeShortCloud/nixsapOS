@@ -7,13 +7,6 @@ in
   options.nixsapos.portableHardware.enable = lib.mkEnableOption "drivers and firmware for booting on any PC";
 
   config = lib.mkIf cfg.enable {
-    # Load storage and input drivers in the initrd for any PC and include all redistributable firmware.
-    hardware.enableAllHardware = true;
-
-    # Load CPU microcode updates for both vendors. The kernel only loads the one that matches the CPU.
-    hardware.cpu.amd.updateMicrocode = true;
-    hardware.cpu.intel.updateMicrocode = true;
-
     # Bluetooth with the adapter powered on at boot. Plasma adds its Bluetooth settings and applet when this is on.
     hardware.bluetooth.enable = true;
   };

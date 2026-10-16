@@ -10,7 +10,6 @@
     nixosModules = {
       default = ./modules;
       gaming = ./modules/features/gaming.nix;
-      generations = ./modules/features/generations.nix;
       graphics-foss = ./modules/features/graphics-foss.nix;
       image = ./modules/image;
       plasma = ./modules/features/plasma.nix;

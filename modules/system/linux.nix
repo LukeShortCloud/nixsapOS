@@ -4,8 +4,6 @@
   # Use the newest kernel for the best support of new hardware.
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
-    # Never suspend USB devices, including the drive nixsapOS runs from.
-    "usbcore.autosuspend=-1"
     # Poll controllers, keyboards, and mice every 1 ms for lower input latency.
     "usbhid.jspoll=1"
     "usbhid.kbpoll=1"
@@ -16,10 +14,6 @@
     "fs.file-max" = 524288;
     # Increase memory mapping limit.
     "vm.max_map_count" = 16777216;
-    # Cache more writes in RAM for fewer writes to the drive.
-    "vm.dirty_background_ratio" = 40;
-    "vm.dirty_ratio" = 80;
-    "vm.vfs_cache_pressure" = 50;
     # zram tuning.
     # https://rootpages.lukeshort.cloud/storage/file_systems.html#zram
     "vm.page-cluster" = 1;

@@ -4,12 +4,10 @@
 {
   imports = [
     ./features/gaming.nix
-    ./features/generations.nix
     ./features/graphics-foss.nix
     ./features/plasma.nix
     ./features/portable-hardware.nix
     ./system/base.nix
-    ./system/boot.nix
     ./system/desktop.nix
     ./system/linux.nix
     ./system/networking.nix
@@ -17,14 +15,10 @@
   ];
 
   nixsapos.gaming.enable = true;
-  nixsapos.generations.enable = true;
   nixsapos.graphicsFoss.enable = true;
   nixsapos.plasma.enable = true;
   nixsapos.plasma.passwordlessLogin = true;
   nixsapos.portableHardware.enable = true;
-
-  # `nh os switch` rebuilds from the flake installed in the image.
-  programs.nh.flake = "/etc/nixos";
 
   system.stateVersion = "26.05";
 }

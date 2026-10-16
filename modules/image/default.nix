@@ -6,6 +6,7 @@ let
 in
 {
   imports = [
+    ./boot.nix
     ./build.nix
     ./drive.nix
     ./encryption.nix
