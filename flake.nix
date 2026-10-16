@@ -11,7 +11,11 @@
       default = ./modules;
       gaming = ./modules/features/gaming.nix;
       graphics-foss = ./modules/features/graphics-foss.nix;
-      image = ./modules/image;
+      # The drive. It also keeps this nixsapOS source in every generation, so /etc/nixos can rebuild offline.
+      image = {
+        imports = [ ./modules/image ];
+        nixsapos.image.flake = self;
+      };
       plasma = ./modules/features/plasma.nix;
       portable-hardware = ./modules/features/portable-hardware.nix;
     };
@@ -22,14 +26,13 @@
       modules = [
         self.nixosModules.default
         self.nixosModules.image
-        { nixsapos.image.flake = self; }
         # The same file that the image installs to /etc/nixos.
         ./templates/host/configuration.nix
       ];
     };
-    # The same system with an encrypted root partition.
+    # The same system with an encrypted root partition. The build writes `true` into its /etc/nixos/configuration.nix.
     nixosConfigurations.nixsapos-encrypted = self.nixosConfigurations.nixsapos.extendModules {
-      modules = [ { nixsapos.image.encryption.enable = true; } ];
+      modules = [ { nixsapos.image.encryption.enable = nixpkgs.lib.mkForce true; } ];
     };
 
     # The flake installed to /etc/nixos. Start a new one with `nix flake init -t github:LukeShortCloud/nixsapOS`.

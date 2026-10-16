@@ -18,19 +18,22 @@ let
       nixpkgs = (lib.importJSON "${flake}/flake.lock").nodes.nixpkgs;
     };
   };
-  # The same settings as templates/host/image.nix, with the values of this image.
-  imageSettings = pkgs.writeText "image.nix" ''
-    # Settings that must match the image this system was installed from. Changing them can make it unbootable.
-    {
-      nixsapos.image.encryption.enable = ${lib.boolToString config.nixsapos.image.encryption.enable};
-    }
-  '';
+  # The template's configuration.nix, with the encryption setting of this image.
+  encryptionSetting = enable: "nixsapos.image.encryption.enable = ${lib.boolToString enable};";
+  templateConfiguration = builtins.readFile "${template}/configuration.nix";
+  hostConfiguration =
+    assert lib.assertMsg (lib.hasInfix (encryptionSetting false) templateConfiguration)
+      "templates/host/configuration.nix must contain `${encryptionSetting false}`.";
+    pkgs.writeText "configuration.nix" (builtins.replaceStrings
+      [ (encryptionSetting false) ]
+      [ (encryptionSetting config.nixsapos.image.encryption.enable) ]
+      templateConfiguration);
 in
 {
   options.nixsapos.image.flake = lib.mkOption {
     type = lib.types.nullOr lib.types.raw;
     default = null;
-    description = "The nixsapOS flake that /etc/nixos uses: `self` in nixsapOS, or the `nixsapos` input of a host flake.";
+    description = "The nixsapOS flake that /etc/nixos uses. The `nixosModules.image` export sets it to nixsapOS itself.";
   };
 
   config = lib.mkMerge [
@@ -45,11 +48,11 @@ in
       # Keep the nixsapOS source in every generation so /etc/nixos can always rebuild offline.
       system.extraDependencies = [ flake.outPath ];
 
-      # The host flake copied to /etc/nixos: the template plus its lock file and the image settings.
+      # The host flake copied to /etc/nixos: the template plus its lock file and the encryption setting.
       system.build.nixsaposHostFlake = pkgs.runCommand "nixsapos-host-flake" { } ''
         cp --recursive --no-preserve=mode ${template} $out
         cp ${pkgs.writeText "flake.lock" (builtins.toJSON hostLock)} $out/flake.lock
-        cp ${imageSettings} $out/image.nix
+        cp ${hostConfiguration} $out/configuration.nix
       '';
 
       # The image build script. It needs root for loop devices, so it runs in a privileged container.

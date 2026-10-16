@@ -21,6 +21,8 @@
 
   # The NixOS release this system was first installed with. Never change it, even after upgrading NixOS.
   system.stateVersion = "26.05";
+  # Whether the drive was flashed from the encrypted image. Never change it, or the drive won't boot.
+  nixsapos.image.encryption.enable = false;
 
   # Add your own changes here. For example, to install more packages:
   # environment.systemPackages = [ pkgs.firefox ];
