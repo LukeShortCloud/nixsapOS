@@ -16,8 +16,12 @@ in
       device = "/dev/disk/by-label/nixsapos-root";
       fsType = "btrfs";
       options = [
-        "compress=zstd:2"
+        # Let zstd try every write. Plain `compress` stops compressing a file when its first write does not shrink.
+        "compress-force=zstd:2"
         "noatime"
+        # Write to the drive every 5 minutes instead of every 30 seconds for fewer writes.
+        # A power loss or an unplugged drive loses up to 5 minutes of changes.
+        "commit=300"
       ];
     };
     fileSystems."/boot" = {

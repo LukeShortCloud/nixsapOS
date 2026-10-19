@@ -78,8 +78,8 @@ in
           NIXSAPOS_IMAGE_NAME = "nixsapos" + lib.optionalString config.nixsapos.image.encryption.enable "-encrypted";
           NIXSAPOS_PARTITIONS = config.system.build.nixsaposPartitions;
           # The same compression as the root mount options, for example "zstd:2".
-          NIXSAPOS_ROOT_COMPRESSION = lib.removePrefix "compress="
-            (lib.findFirst (lib.hasPrefix "compress=") "compress=no" config.fileSystems."/".options);
+          NIXSAPOS_ROOT_COMPRESSION = lib.removePrefix "compress-force="
+            (lib.findFirst (lib.hasPrefix "compress-force=") "compress-force=no" config.fileSystems."/".options);
           NIXSAPOS_ROOT_EMPTY_PASSWORD_MARKER = config.nixsapos.image.encryption.emptyPasswordMarker;
           NIXSAPOS_ROOT_ENCRYPT = config.nixsapos.image.partitions."20-root".Encrypt or "off";
           NIXSAPOS_ROOT_LABEL = config.nixsapos.image.partitions."20-root".Label;
