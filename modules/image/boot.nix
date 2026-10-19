@@ -27,6 +27,18 @@ in
     };
     # Use RAM for temporary files for fewer writes to the drive.
     boot.tmp.useTmpfs = true;
+    # Keep logs in RAM for fewer writes to the drive. They are lost on reboot.
+    # The encrypted image keeps them on the drive, like the winesapOS secure image.
+    services.journald.storage = lib.mkIf (!config.nixsapos.image.encryption.enable) "volatile";
+    fileSystems."/var/log" = lib.mkIf (!config.nixsapos.image.encryption.enable) {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = [
+        "mode=0755"
+        "nosuid"
+        "nodev"
+      ];
+    };
     boot.kernel.sysctl = {
       # Cache more writes in RAM for fewer writes to the drive.
       "vm.dirty_background_ratio" = 40;
