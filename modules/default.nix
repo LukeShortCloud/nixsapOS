@@ -15,7 +15,11 @@
     ./system/users.nix
   ];
 
-  nixsapos.gaming.enable = true;
+  nixsapos.gaming = {
+    enable = true;
+    # "minimal" (default), "free" or "unfree".
+    selection = "minimal";
+  };
   nixsapos.graphicsFoss.enable = true;
   nixsapos.plasma = {
     enable = true;

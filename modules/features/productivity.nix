@@ -77,9 +77,8 @@ in
         google-chrome
         veracrypt
       ];
-      # Only allow the proprietary packages that this module adds.
-      nixpkgs.config.allowUnfreePredicate = lib.mkDefault (pkg:
-        builtins.elem (lib.getName pkg) [ "google-chrome" "veracrypt" ]);
+      # Only allow the proprietary packages that this module adds. Lists from other modules are merged.
+      nixpkgs.config.allowUnfreePackages = [ "google-chrome" "veracrypt" ];
     })
   ]);
 }

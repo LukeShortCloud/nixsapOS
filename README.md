@@ -32,14 +32,15 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Package managers (GUI) | Discover (flatpak) and Shelly (AppImage, flatpak, pacman, and AUR) | Discover (flatpak) |
 | Update type | Package manager | Declarative (`nixos-rebuild`) |
 | Number of installed packages | Small (minimal image) or Large (performance and secure images) | Small |
-| Productivity applications | Small (minimal image) or Large (performance and secure images) | Small (`minimal`). Large (`free` or `unfree` with Google Chrome and VeraCrypt) after a rebuild |
+| Productivity applications | Small (minimal image) or Large (performance and secure images) | Small (`minimal`) or Large (`free` or `unfree`) |
+| Gaming applications | Small (minimal image) or Large (performance and secure images) | Small (`minimal`) or Large (`free` or `unfree`) |
 | Image types | Minimal, performance, and secure | One (minimal) |
 | Linux kernels | Linux LTS and Linux Nobara | Latest stable Linux |
 | Additional hardware drivers (Apple Intel Mac, ASUS, AYANEO, Framework Computer, Microsoft Surface, and more) | Yes | No |
 | Desktop environment | KDE Plasma 6 | KDE Plasma 6 |
 | Desktop theme | Breeze | Breeze |
 | Display manager | Plasma Login Manager | Plasma Login Manager |
-| Wine | Proton and GE-Proton | None |
+| Wine | Proton and GE-Proton | Proton and GE-Proton (`unfree`, after a rebuild) |
 | Game controller support | Large | Small |
 | exFAT cross-platform storage | Yes (16 GiB by default, optional) | Yes (16 GiB, mandatory) |
 | Unique UUIDs per flashed drive | No | Partition UUIDs (regenerated on first boot) |
@@ -61,10 +62,9 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Btrfs backups with Snapper and snap-pac.
     - Support for many additional file systems (APFS, Bcachefs, FATX, HFS+, ZFS, SSHFS, s3fs, and more). nixsapOS only has the NixOS defaults.
 - **Gaming**
-    - Game launchers (Steam, Heroic Games Launcher, Lutris, Open Gamepad UI, Prism Launcher, and more).
-    - Wine and Proton tools (GE-Proton, ProtonUp-Qt, and umu-launcher).
-    - The Gamescope Session ("Game Mode" like on the Steam Deck).
-    - Gaming utilities (GameMode, MangoHud, GOverlay, LACT, Ludusavi, Moonlight, Sunshine, and more).
+    - Emulators (RetroDECK and EmuDeck).
+    - Steam extras (Decky Loader, NonSteamLaunchers, RemotePlayWhatever, and GameImage).
+    - The Nexus Mods app. It was discontinued upstream.
     - Extra controller support (InputPlumber, game-devices-udev, AntiMicroX, OpenRazer, and Oversteer).
 - **Productivity**
     - balenaEtcher, Flatseal, and the ZeroTier GUI. They are not in nixpkgs.

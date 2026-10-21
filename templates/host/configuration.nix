@@ -32,6 +32,10 @@
   # Or also proprietary applications such as Google Chrome with "unfree".
   # nixsapos.productivity.selection = "free";
 
+  # Install all open source game launchers and utilities with "free".
+  # Or also proprietary applications such as Steam with "unfree".
+  # nixsapos.gaming.selection = "unfree";
+
   # Add your own changes here. For example, to install more packages:
   # environment.systemPackages = [ pkgs.firefox ];
 }

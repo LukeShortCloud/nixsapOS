@@ -24,9 +24,27 @@ let
     pkgs.writeText "check-${name}" (builtins.unsafeDiscardStringContext system.config.system.build.toplevel.drvPath);
 in
 {
-  gaming = checkModules "gaming" [
+  # Each level of applications.
+  gaming-minimal = checkModules "gaming-minimal" [
     self.nixosModules.gaming
     { nixsapos.gaming.enable = true; }
+  ];
+  gaming-free = checkModules "gaming-free" [
+    self.nixosModules.gaming
+    { nixsapos.gaming = { enable = true; selection = "free"; }; }
+  ];
+  gaming-unfree = checkModules "gaming-unfree" [
+    self.nixosModules.gaming
+    { nixsapos.gaming = { enable = true; selection = "unfree"; }; }
+  ];
+  # Both features install proprietary packages and share one allow list.
+  gaming-productivity-unfree = checkModules "gaming-productivity-unfree" [
+    self.nixosModules.gaming
+    self.nixosModules.productivity
+    {
+      nixsapos.gaming = { enable = true; selection = "unfree"; };
+      nixsapos.productivity = { enable = true; selection = "unfree"; };
+    }
   ];
   graphics-foss = checkModules "graphics-foss" [
     self.nixosModules.graphics-foss
