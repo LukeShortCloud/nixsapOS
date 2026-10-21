@@ -40,4 +40,17 @@ in
     self.nixosModules.portable-hardware
     { nixsapos.portableHardware.enable = true; }
   ];
+  # Each level of applications.
+  productivity-minimal = checkModules "productivity-minimal" [
+    self.nixosModules.productivity
+    { nixsapos.productivity.enable = true; }
+  ];
+  productivity-free = checkModules "productivity-free" [
+    self.nixosModules.productivity
+    { nixsapos.productivity = { enable = true; selection = "free"; }; }
+  ];
+  productivity-unfree = checkModules "productivity-unfree" [
+    self.nixosModules.productivity
+    { nixsapos.productivity = { enable = true; selection = "unfree"; }; }
+  ];
 }

@@ -28,6 +28,10 @@
   services.openssh.enable = true;
   systemd.services.sshd.wantedBy = lib.mkForce [ ];
 
+  # Install all open source productivity applications with "free".
+  # Or also proprietary applications such as Google Chrome with "unfree".
+  # nixsapos.productivity.selection = "free";
+
   # Add your own changes here. For example, to install more packages:
   # environment.systemPackages = [ pkgs.firefox ];
 }

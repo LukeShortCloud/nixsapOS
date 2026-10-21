@@ -18,6 +18,7 @@
       };
       plasma = ./modules/features/plasma.nix;
       portable-hardware = ./modules/features/portable-hardware.nix;
+      productivity = ./modules/features/productivity.nix;
     };
 
     # A complete nixsapOS system built from the modules above.

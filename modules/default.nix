@@ -7,6 +7,7 @@
     ./features/graphics-foss.nix
     ./features/plasma.nix
     ./features/portable-hardware.nix
+    ./features/productivity.nix
     ./system/base.nix
     ./system/desktop.nix
     ./system/linux.nix
@@ -16,9 +17,16 @@
 
   nixsapos.gaming.enable = true;
   nixsapos.graphicsFoss.enable = true;
-  nixsapos.plasma.enable = true;
-  nixsapos.plasma.passwordlessLogin = true;
+  nixsapos.plasma = {
+    enable = true;
+    passwordlessLogin = true;
+  };
   nixsapos.portableHardware.enable = true;
+  nixsapos.productivity = {
+    enable = true;
+    # "minimal" (default), "free" or "unfree".
+    selection = "minimal";
+  };
 
   # git is required for some NixOS operations.
   programs.git.enable = true;

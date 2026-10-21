@@ -32,6 +32,7 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Package managers (GUI) | Discover (flatpak) and Shelly (AppImage, flatpak, pacman, and AUR) | Discover (flatpak) |
 | Update type | Package manager | Declarative (`nixos-rebuild`) |
 | Number of installed packages | Small (minimal image) or Large (performance and secure images) | Small |
+| Productivity applications | Small (minimal image) or Large (performance and secure images) | Small (`minimal`). Large (`free` or `unfree` with Google Chrome and VeraCrypt) after a rebuild |
 | Image types | Minimal, performance, and secure | One (minimal) |
 | Linux kernels | Linux LTS and Linux Nobara | Latest stable Linux |
 | Additional hardware drivers (Apple Intel Mac, ASUS, AYANEO, Framework Computer, Microsoft Surface, and more) | Yes | No |
@@ -66,12 +67,10 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Gaming utilities (GameMode, MangoHud, GOverlay, LACT, Ludusavi, Moonlight, Sunshine, and more).
     - Extra controller support (InputPlumber, game-devices-udev, AntiMicroX, OpenRazer, and Oversteer).
 - **Productivity**
-    - Productivity applications (Google Chrome, LibreOffice, GIMP, VLC, KeePassXC, OBS Studio, and more). Firefox ESR is already included.
-    - Support tools (ClamAV, QDirStat, tmate, and ZeroTier VPN).
+    - balenaEtcher, Flatseal, and the ZeroTier GUI. They are not in nixpkgs.
     - Battery optimizations (TLP).
 - **Package managers**
     - Homebrew and Snap.
-    - Waydroid for Android apps.
 - **Hardware**
     - Additional drivers for Apple Intel Macs (including T2), ASUS laptops, ASUS ROG Ally, AYANEO, Framework Computer, Lenovo Legion Go, Microsoft Surface, MSI Claw, OneXPlayer, and Valve Steam Deck.
 - **Desktop**
