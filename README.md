@@ -40,8 +40,8 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Desktop environment | KDE Plasma 6 | KDE Plasma 6 |
 | Desktop theme | Breeze | Breeze |
 | Display manager | Plasma Login Manager | Plasma Login Manager |
-| Wine | Proton and GE-Proton | Proton and GE-Proton (`unfree`, after a rebuild) |
-| Game controller support | Large | Small |
+| Wine | Proton and GE-Proton | Proton and GE-Proton (`unfree`) |
+| Game controller support | Large | Large (`minimal`, `free`, and `unfree`) |
 | exFAT cross-platform storage | Yes (16 GiB by default, optional) | Yes (16 GiB, mandatory) |
 | Unique UUIDs per flashed drive | No | Partition UUIDs (regenerated on first boot) |
 | First-time setup wizard | Yes | No |
@@ -65,7 +65,6 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Emulators (RetroDECK and EmuDeck).
     - Steam extras (Decky Loader, NonSteamLaunchers, RemotePlayWhatever, and GameImage).
     - The Nexus Mods app. It was discontinued upstream.
-    - Extra controller support (InputPlumber, game-devices-udev, AntiMicroX, OpenRazer, and Oversteer).
 - **Productivity**
     - balenaEtcher, Flatseal, and the ZeroTier GUI. They are not in nixpkgs.
     - Battery optimizations (TLP).

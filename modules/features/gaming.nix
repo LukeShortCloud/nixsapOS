@@ -38,13 +38,40 @@ in
         mangohud
         pkgsi686Linux.mangohud
       ];
+
+      # Controllers built into gaming handhelds.
+      services.inputplumber.enable = true;
+      # The NixOS module does not install the suspend service that comes with InputPlumber.
+      # This is the same unit, so that controllers keep working after sleep.
+      systemd.services.inputplumber-suspend = {
+        description = "InputPlumber Suspend Inhibit Service";
+        before = [ "sleep.target" ];
+        wantedBy = [ "sleep.target" ];
+        unitConfig.StopWhenUnneeded = true;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${config.systemd.package}/bin/busctl call org.shadowblip.InputPlumber /org/shadowblip/InputPlumber/Manager org.shadowblip.InputManager HookSleep";
+          ExecStop = "${config.systemd.package}/bin/busctl call org.shadowblip.InputPlumber /org/shadowblip/InputPlumber/Manager org.shadowblip.InputManager HookWake";
+        };
+      };
+      # Steam Controller, Steam Deck and Valve Index rules. Steam itself is not needed.
+      hardware.steam-hardware.enable = true;
+      # Rules for many more controllers. They need the virtual input device (uinput).
+      services.udev.packages = [ pkgs.game-devices-udev-rules ];
+      hardware.uinput.enable = true;
     }
     (lib.mkIf free {
       environment.systemPackages = with pkgs; [
+        # Controller and racing wheel tools.
+        antimicrox
+        oversteer
+        ## RGB lighting for Razer devices.
+        polychromatic
         # Game launchers.
         bottles
         heroic
-        # The full lutris package includes Steam, which is proprietary.
+        ## The full Lutris package includes the unfree Steam package.
         lutris-free
         prismlauncher
         umu-launcher
@@ -62,16 +89,25 @@ in
         protonup-qt
       ];
 
-      # A game launcher for handhelds, with its own login screen session.
+      # A vide game console experience.
       programs.opengamepadui = {
         enable = true;
         gamescopeSession.enable = true;
       };
+      # Racing wheel permissions for Oversteer.
+      services.udev.packages = [ pkgs.oversteer ];
+      # Razer devices. Every normal user can use them.
+      hardware.openrazer = {
+        enable = true;
+        users = lib.attrNames (lib.filterAttrs (_: user: user.isNormalUser) config.users.users);
+      };
+      # Corsair keyboards and mice.
+      hardware.ckb-next.enable = true;
       # Graphics card settings and overclocking.
       services.lact.enable = true;
       # Game recording and streaming.
       programs.obs-studio.enable = true;
-      # Host games for Moonlight. It is installed but not started, so the open ports have nothing listening by default.
+      # Host games for Moonlight. It is installed but not started by default.
       services.sunshine = {
         enable = true;
         autoStart = false;
@@ -88,12 +124,17 @@ in
         gamescopeSession.enable = true;
       };
       environment.systemPackages = [ pkgs.discord ];
+      # The Xbox wireless USB dongle for PC has proprietary firmware.
+      # It turns off the mt76x2u and xpad drivers.
+      # xpad-noone is used for wired Xbox controllers.
+      hardware.xone.enable = true;
 
       # Only allow the proprietary packages that this module adds. Lists from other modules are merged.
       nixpkgs.config.allowUnfreePackages = [
         "discord"
         "steam"
         "steam-unwrapped"
+        "xone-dongle-firmware"
       ];
     })
   ]);
