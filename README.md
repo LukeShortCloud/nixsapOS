@@ -59,7 +59,7 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Ventoy support.
 - **Storage**
     - A published encrypted image. It can be built, but is not released yet.
-    - Support for many additional file systems (APFS, Bcachefs, FATX, HFS+, ZFS, SSHFS, s3fs, and more). nixsapOS only has the NixOS defaults.
+    - Some additional file systems: APFS, FATX, GlusterFS, HFS+, ZFS, s3fs, and more. nixsapOS supports Bcachefs, Btrfs, CIFS/SMB, EROFS, exFAT, F2FS, FAT, JFS, NFS, NTFS, SSHFS, and XFS.
 - **Gaming**
     - EmuDeck. nixsapOS has RetroArch and RetroDECK instead.
     - Decky Loader.
