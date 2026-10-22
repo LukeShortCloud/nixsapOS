@@ -25,8 +25,8 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Logs | In RAM (persistent on the secure image) | In RAM (persistent on the encrypted image) |
 | Root file system resize | During the first-time setup | Automatic on first boot |
 | Encrypted file system | Yes (secure image) | Yes (secure image) |
-| System rollbacks | Btrfs snapshots | NixOS generations (up to 5) |
-| File system backups | Btrfs snapshots (Snapper) | No |
+| System rollbacks | Btrfs snapshots (Snapper) | NixOS generations |
+| Backups of `/home/` | Btrfs snapshots (Snapper) | Btrfs snapshots (Snapper) |
 | Package managers (CLI) | flatpak, homebrew, nix, pacman, paru and yay (AUR), and snap | flatpak and nix |
 | Preferred package manager (CLI) | flatpak | nix |
 | Package managers (GUI) | Discover (flatpak) and Shelly (AppImage, flatpak, pacman, and AUR) | Discover (flatpak) |
@@ -59,7 +59,6 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Ventoy support.
 - **Storage**
     - A published encrypted image. It can be built, but is not released yet.
-    - Btrfs backups with Snapper and snap-pac.
     - Support for many additional file systems (APFS, Bcachefs, FATX, HFS+, ZFS, SSHFS, s3fs, and more). nixsapOS only has the NixOS defaults.
 - **Gaming**
     - EmuDeck. nixsapOS has RetroArch and RetroDECK instead.

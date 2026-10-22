@@ -23,6 +23,8 @@
   system.stateVersion = "26.05";
   # Whether the drive was flashed from the encrypted image. Never change it, or the drive won't boot.
   nixsapos.image.encryption.enable = false;
+  # Take a Snapper snapshot of /home every month and keep the last 5. List them with `sudo snapper -c home list`.
+  # nixsapos.image.snapper.enable = true;
 
   # sshd.service is installed but not enabled by default.
   services.openssh.enable = true;
