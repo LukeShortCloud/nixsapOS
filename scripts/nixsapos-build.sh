@@ -70,12 +70,17 @@ fi
 # The space in front of the file system: the LUKS2 header, or nothing.
 root_header_size="$(( $(blockdev --getsize64 "${root_partition}") - $(blockdev --getsize64 "${root_device}") ))"
 
+# /home is its own Btrfs subvolume, so that Snapper can take snapshots of it without the system.
+# Root stays the top-level subvolume, so /home needs no extra mount.
+mkdir -p "${root_dir}/home"
+
 # Create the smallest possible root file system from the installed files. The first boot grows it to fill the drive.
 mkfs.btrfs \
     --force \
     --label "${NIXSAPOS_ROOT_LABEL}" \
     --compress "${NIXSAPOS_ROOT_COMPRESSION}" \
     --rootdir "${root_dir}" \
+    --subvol rw:home \
     --shrink \
     "${root_device}"
 root_fs_size="$(btrfs inspect-internal dump-super "${root_device}" | awk '$1 == "total_bytes" { print $2 }')"
