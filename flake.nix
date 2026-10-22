@@ -3,13 +3,21 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # Declarative Flatpaks (services.flatpak.packages). Pinned to a release.
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.8.0";
   };
 
-  outputs = { self, nixpkgs }: {
+  outputs = { self, nixpkgs, nix-flatpak }: {
     # Reusable NixOS modules. Other flakes can import these.
     nixosModules = {
-      default = ./modules;
-      gaming = ./modules/features/gaming.nix;
+      # The gaming module installs Flatpaks declaratively, so nix-flatpak comes with it.
+      # NixOS loads the same module path only once, even when it is imported twice.
+      default = {
+        imports = [ ./modules nix-flatpak.nixosModules.nix-flatpak ];
+      };
+      gaming = {
+        imports = [ ./modules/features/gaming.nix nix-flatpak.nixosModules.nix-flatpak ];
+      };
       graphics-foss = ./modules/features/graphics-foss.nix;
       # The drive. It also keeps this nixsapOS source in every generation, so /etc/nixos can rebuild offline.
       image = {

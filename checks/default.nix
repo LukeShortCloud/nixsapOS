@@ -3,6 +3,15 @@
 let
   pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
+  # Flatpak needs XDG desktop portal (automatically provided by KDE Plasma).
+  desktopPortal = {
+    xdg.portal = {
+      enable = true;
+      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+      config.common.default = "*";
+    };
+  };
+
   # Evaluate a minimal NixOS system that only uses the given modules (no nixsapOS profile).
   # The check passes if the system evaluates. Nothing is built.
   checkModules = name: modules:
@@ -35,12 +44,14 @@ in
   ];
   gaming-unfree = checkModules "gaming-unfree" [
     self.nixosModules.gaming
+    desktopPortal
     { nixsapos.gaming = { enable = true; selection = "unfree"; }; }
   ];
   # Both features install proprietary packages and share one allow list.
   gaming-productivity-unfree = checkModules "gaming-productivity-unfree" [
     self.nixosModules.gaming
     self.nixosModules.productivity
+    desktopPortal
     {
       nixsapos.gaming = { enable = true; selection = "unfree"; };
       nixsapos.productivity = { enable = true; selection = "unfree"; };

@@ -5,6 +5,8 @@ let
   # Each level includes the one before it.
   free = cfg.selection != "minimal";
   unfree = cfg.selection == "unfree";
+  # The full package adds 16 cores with non-commercial licenses, such as Snes9x and FBNeo.
+  retroarch = if unfree then pkgs.retroarch-full else pkgs.retroarch-free;
 in
 {
   options.nixsapos.gaming = {
@@ -17,6 +19,7 @@ in
         "minimal" adds the graphics drivers and game tuning tools. "free" adds all open source launchers and utilities.
         "unfree" adds all open source and proprietary applications, such as Steam and Discord.
         Only the proprietary packages that this module adds are allowed, unless `nixpkgs.config` already allows them.
+        "unfree" also installs RetroDECK as a Flatpak, which needs a desktop with XDG desktop portals (`xdg.portal`).
       '';
     };
   };
@@ -68,6 +71,8 @@ in
         oversteer
         ## RGB lighting for Razer devices.
         polychromatic
+        # Emulators.
+        retroarch
         # Game launchers.
         bottles
         heroic
@@ -128,10 +133,33 @@ in
       # It turns off the mt76x2u and xpad drivers.
       # xpad-noone is used for wired Xbox controllers.
       hardware.xone.enable = true;
+      # RetroDECK provides emulators for many modern consoles (compared to RetroArch). It is only available as a Flatpak.
+      # It is unfree because it includes RPCS3 which has a license conflict.
+      services.flatpak = {
+        enable = true;
+        packages = [ { appId = "net.retrodeck.retrodeck"; origin = "flathub"; } ];
+      };
 
       # Only allow the proprietary packages that this module adds. Lists from other modules are merged.
       nixpkgs.config.allowUnfreePackages = [
         "discord"
+        # RetroArch cores in retroarch-full.
+        "libretro-fbalpha2012"
+        "libretro-fbneo"
+        "libretro-fmsx"
+        "libretro-genesis-plus-gx"
+        "libretro-mame2000"
+        "libretro-mame2003"
+        "libretro-mame2003-plus"
+        "libretro-mame2010"
+        "libretro-mame2015"
+        "libretro-opera"
+        "libretro-picodrive"
+        "libretro-snes9x"
+        "libretro-snes9x2002"
+        "libretro-snes9x2005"
+        "libretro-snes9x2005-plus"
+        "libretro-snes9x2010"
         "steam"
         "steam-unwrapped"
         "xone-dongle-firmware"

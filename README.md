@@ -62,8 +62,9 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Btrfs backups with Snapper and snap-pac.
     - Support for many additional file systems (APFS, Bcachefs, FATX, HFS+, ZFS, SSHFS, s3fs, and more). nixsapOS only has the NixOS defaults.
 - **Gaming**
-    - Emulators (RetroDECK and EmuDeck).
-    - Steam extras (Decky Loader, NonSteamLaunchers, RemotePlayWhatever, and GameImage).
+    - EmuDeck. nixsapOS has RetroArch and RetroDECK instead.
+    - Decky Loader.
+    - NonSteamLaunchers (Steam can already add other games), RemotePlayWhatever (broken upstream), and GameImage (it can be downloaded). They are not planned.
     - The Nexus Mods app. It was discontinued upstream.
 - **Productivity**
     - balenaEtcher, Flatseal, and the ZeroTier GUI. They are not in nixpkgs.
