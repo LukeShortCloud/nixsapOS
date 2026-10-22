@@ -74,7 +74,7 @@ These are the major winesapOS features that nixsapOS does not have yet.
 - **Hardware**
     - Additional drivers for Apple Intel Macs (including T2), ASUS laptops, ASUS ROG Ally, AYANEO, Framework Computer, Lenovo Legion Go, Microsoft Surface, MSI Claw, OneXPlayer, and Valve Steam Deck.
 - **Desktop**
-    - Additional desktop environments (Cinnamon, COSMIC, GNOME, i3, Plasma Mobile, and Sway) and Xorg.
+    - Additional desktop environments (Cinnamon, COSMIC, GNOME, i3, Plasma Mobile, and Sway) and Xorg. They are not planned because each one is a single NixOS option that users can enable in `/etc/nixos/configuration.nix`.
 - **Setup and upgrades**
     - The first-time setup wizard.
     - The winesapOS Upgrade wizard.

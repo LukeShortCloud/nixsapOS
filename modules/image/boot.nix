@@ -43,6 +43,11 @@ in
         "nodev"
       ];
     };
+    # I/O schedulers for a responsive desktop: BFQ for SATA, SD card, and USB drives. Kyber for NVMe drives.
+    services.udev.extraRules = ''
+      ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="sd[a-z]*|mmcblk[0-9]*", ATTR{queue/scheduler}="bfq"
+      ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="kyber"
+    '';
     boot.kernel.sysctl = {
       # Cache more writes in RAM for fewer writes to the drive.
       "vm.dirty_background_ratio" = 40;
