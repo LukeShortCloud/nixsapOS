@@ -20,4 +20,11 @@
     enable = true;
     nssmdns4 = true;
   };
+
+  # Firmware updates with "fwupdmgr" or Discover. Nothing is checked or installed until the user asks.
+  # Plasma already turns this on by default. It is set here so it does not depend on Plasma.
+  services.fwupd.enable = true;
+  # Do not download the firmware list every hour in the background. This masks the timer.
+  # "fwupdmgr refresh" and Discover still download it when the user asks.
+  systemd.timers.fwupd-refresh.enable = false;
 }
