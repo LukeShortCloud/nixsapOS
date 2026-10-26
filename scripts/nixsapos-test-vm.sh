@@ -3,9 +3,9 @@
 # This is for local testing only. Building the image never uses a virtual machine.
 #
 # Usage: scripts/nixsapos-test-vm.sh [IMAGE]
-#   IMAGE defaults to output/nixsapos.img from `nix run .#nixsapos-build`.
+#   IMAGE defaults to ~/.cache/nixsapos/nixsapos.img from `nix run .#nixsapos-build` (see CONTRIBUTING.md).
 # Environment variables:
-#   NIXSAPOS_VM_DIR        Where the disk copy and UEFI variables are stored (default: vm/).
+#   NIXSAPOS_VM_DIR        Where the disk copy and UEFI variables are stored (default: ~/.cache/nixsapos/vm/).
 #   NIXSAPOS_VM_DISK_SIZE  Size of the virtual drive, to test growing the root partition (default: 32G).
 #   NIXSAPOS_VM_MEMORY     RAM for the virtual machine (default: 4G).
 #   NIXSAPOS_VM_HEADLESS   Set to 1 to use the serial console in the terminal instead of a window.
@@ -13,15 +13,17 @@
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-image="${1:-${repo_dir}/output/nixsapos.img}"
-vm_dir="${NIXSAPOS_VM_DIR:-${repo_dir}/vm}"
+# Outside the repository, because a `path:` flake reference would copy the images into the Nix store.
+cache_dir="${XDG_CACHE_HOME:-${HOME}/.cache}/nixsapos"
+image="${1:-${cache_dir}/nixsapos.img}"
+vm_dir="${NIXSAPOS_VM_DIR:-${cache_dir}/vm}"
 disk_size="${NIXSAPOS_VM_DISK_SIZE:-32G}"
 memory="${NIXSAPOS_VM_MEMORY:-4G}"
 
 # Use QEMU and OVMF from the nixpkgs version pinned in flake.lock.
 nix_build() {
     nix --extra-experimental-features "nix-command flakes" build --no-link --print-out-paths \
-        --inputs-from "path:${repo_dir}" "nixpkgs#$1"
+        --inputs-from "git+file://${repo_dir}" "nixpkgs#$1"
 }
 qemu="$(nix_build qemu_kvm)"
 ovmf="$(nix_build OVMF.fd)"

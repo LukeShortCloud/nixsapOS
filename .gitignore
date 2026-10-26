@@ -7,9 +7,3 @@ result-*
 
 # Ignore NixOS interactive test driver history
 **/.nixos-test-history
-
-# Ignore the local test virtual machine created by scripts/nixsapos-test-vm.sh
-vm/
-
-# Ignore the raw image created by scripts/nixsapos-build.sh
-output/

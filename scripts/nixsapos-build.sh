@@ -1,4 +1,12 @@
-output_dir="output"
+# Where the image is written. The container commands in CONTRIBUTING.md mount it from ~/.cache/nixsapos on the host.
+output_dir="${NIXSAPOS_OUTPUT_DIR:?Set NIXSAPOS_OUTPUT_DIR to a directory outside the repository. See CONTRIBUTING.md.}"
+# A `path:` flake reference copies the whole repository into the Nix store, ignoring .gitignore, so an image inside it is copied too.
+case "$(realpath --canonicalize-missing "${output_dir}")/" in
+    "$(pwd -P)/"*)
+        echo "NIXSAPOS_OUTPUT_DIR must be outside the repository: ${output_dir}" >&2
+        exit 1
+        ;;
+esac
 image="${output_dir}/${NIXSAPOS_IMAGE_NAME}.img"
 
 # The installed system plus 25% for file system overhead. The root partition shrinks to fit at the end.
@@ -99,5 +107,5 @@ partition_table="$(sfdisk --dump "${image}" | grep -v -E '^(first-lba|last-lba):
 truncate -s "$(( (root_start + root_sectors) * 512 + mib ))" "${image}"
 echo "${partition_table}" | sfdisk --quiet "${image}"
 
-# Give the output to the owner of the repository instead of root.
+# Give the output to the owner of the repository instead of root. Docker creates a missing volume directory as root, so this includes the directory.
 chown --recursive --reference=. "${output_dir}"

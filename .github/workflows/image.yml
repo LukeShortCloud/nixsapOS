@@ -21,7 +21,11 @@ jobs:
       # The same commands as a local build with Docker (see CONTRIBUTING.md).
       - name: Create the builder container image
         run: docker build -t nixsapos-builder -f build/Containerfile build/
+      # Outside the repository, like a local build. With act's --bind, this is next to the repository on the host.
+      - name: Choose the output directory
+        run: echo "NIXSAPOS_OUTPUT=$(dirname "${GITHUB_WORKSPACE}")/nixsapos-output" >> "${GITHUB_ENV}"
       - name: Build the image
-        run: docker run --rm --privileged -v /dev:/dev -v nixsapos-nix:/nix -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix run .#nixsapos-build
+        run: docker run --rm --privileged -v /dev:/dev -v nixsapos-nix:/nix -v "${GITHUB_WORKSPACE}":/workdir -w /workdir -v "${NIXSAPOS_OUTPUT}":/output -e NIXSAPOS_OUTPUT_DIR=/output nixsapos-builder nix run .#nixsapos-build
+      # List it from a container, because act's own container only sees the repository.
       - name: Show the image
-        run: ls -lh output/
+        run: docker run --rm -v "${NIXSAPOS_OUTPUT}":/output nixsapos-builder ls -lh /output

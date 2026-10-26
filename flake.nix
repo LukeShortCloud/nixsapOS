@@ -51,9 +51,9 @@
       welcomeText = "Add your own changes to configuration.nix. Apply them by running `sudo nixos-rebuild switch --flake .` in this directory.";
     };
 
-    # Build the flashable raw disk image in output/ as root, in a privileged container: `nix run .#nixsapos-build`.
+    # Build the flashable raw disk image in $NIXSAPOS_OUTPUT_DIR as root, in a privileged container: `nix run .#nixsapos-build`.
     packages.x86_64-linux.nixsapos-build = self.nixosConfigurations.nixsapos.config.system.build.nixsaposBuild;
-    # The encrypted image in output/nixsapos-encrypted.img: `nix run .#nixsapos-build-encrypted`.
+    # The encrypted image in $NIXSAPOS_OUTPUT_DIR/nixsapos-encrypted.img: `nix run .#nixsapos-build-encrypted`.
     packages.x86_64-linux.nixsapos-build-encrypted = self.nixosConfigurations.nixsapos-encrypted.config.system.build.nixsaposBuild;
 
     # Each reusable module must work on any NixOS system.
