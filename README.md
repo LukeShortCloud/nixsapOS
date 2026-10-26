@@ -40,6 +40,7 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Desktop environment | KDE Plasma 6 | KDE Plasma 6 |
 | Desktop theme | Breeze | Breeze |
 | Display manager | Plasma Login Manager | Plasma Login Manager |
+| Printing | CUPS (USB, network, Bluetooth, and PDF) | CUPS (USB, network with discovery, Bluetooth, and PDF) |
 | Wine | Proton and GE-Proton | Proton and GE-Proton (`unfree`) |
 | Game controller support | Large | Large (`minimal`, `free`, and `unfree`) |
 | exFAT cross-platform storage | Yes (16 GiB by default, optional) | Yes (16 GiB, mandatory) |
