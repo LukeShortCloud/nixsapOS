@@ -11,6 +11,7 @@ in
     ./drive.nix
     ./encryption.nix
     ./first-boot.nix
+    ./secure.nix
   ];
 
   # Partition definitions shared by the image build and the first boot (systemd.repart).
