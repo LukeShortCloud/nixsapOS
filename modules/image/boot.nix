@@ -71,8 +71,12 @@ in
     # Load CPU microcode updates for both vendors. The kernel only loads the one that matches the CPU.
     hardware.cpu.amd.updateMicrocode = true;
     hardware.cpu.intel.updateMicrocode = true;
-    # Never suspend USB devices, including the drive nixsapOS runs from.
-    boot.kernelParams = [ "usbcore.autosuspend=-1" ];
+    boot.kernelParams = [
+      # Never suspend USB devices, including the drive nixsapOS runs from.
+      "usbcore.autosuspend=-1"
+    ]
+    # Turn off CPU vulnerability mitigations for more performance on the minimal image only.
+    ++ lib.optional (!config.nixsapos.image.encryption.enable) "mitigations=off";
 
     # Rebuild from the flake in /etc/nixos.
     nix.settings.experimental-features = [
