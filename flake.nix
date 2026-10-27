@@ -39,8 +39,9 @@
         ./templates/host/configuration.nix
       ];
     };
-    # The same system with an encrypted root partition. The build writes `true` into its /etc/nixos/configuration.nix.
-    nixosConfigurations.nixsapos-encrypted = self.nixosConfigurations.nixsapos.extendModules {
+    # The secure image: the same system with an encrypted root partition, like the winesapOS secure image.
+    # The build writes `true` into its /etc/nixos/configuration.nix.
+    nixosConfigurations.nixsapos-secure = self.nixosConfigurations.nixsapos.extendModules {
       modules = [ { nixsapos.image.encryption.enable = nixpkgs.lib.mkForce true; } ];
     };
 
@@ -53,8 +54,8 @@
 
     # Build the flashable raw disk image in $NIXSAPOS_OUTPUT_DIR as root, in a privileged container: `nix run .#nixsapos-build`.
     packages.x86_64-linux.nixsapos-build = self.nixosConfigurations.nixsapos.config.system.build.nixsaposBuild;
-    # The encrypted image in $NIXSAPOS_OUTPUT_DIR/nixsapos-encrypted.img: `nix run .#nixsapos-build-encrypted`.
-    packages.x86_64-linux.nixsapos-build-encrypted = self.nixosConfigurations.nixsapos-encrypted.config.system.build.nixsaposBuild;
+    # The secure image in $NIXSAPOS_OUTPUT_DIR/nixsapos-secure.img: `nix run .#nixsapos-build-secure`.
+    packages.x86_64-linux.nixsapos-build-secure = self.nixosConfigurations.nixsapos-secure.config.system.build.nixsaposBuild;
 
     # Each reusable module must work on any NixOS system.
     checks.x86_64-linux = import ./checks { inherit self nixpkgs; };

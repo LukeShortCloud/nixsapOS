@@ -21,7 +21,7 @@
 
   # The NixOS release this system was first installed with. Never change it, even after upgrading NixOS.
   system.stateVersion = "26.05";
-  # Whether the drive was flashed from the encrypted image. Never change it, or the drive won't boot.
+  # Whether the drive was flashed from the secure image, which has an encrypted root partition. Never change it, or the drive won't boot.
   nixsapos.image.encryption.enable = false;
   # Take a Snapper snapshot of /home every month and keep the last 5. List them with `sudo snapper -c home list`.
   # nixsapos.image.snapper.enable = true;

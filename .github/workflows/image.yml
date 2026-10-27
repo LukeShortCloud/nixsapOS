@@ -15,8 +15,8 @@ jobs:
         include:
           - image: nixsapos
             package: nixsapos-build
-          - image: nixsapos-encrypted
-            package: nixsapos-build-encrypted
+          - image: nixsapos-secure
+            package: nixsapos-build-secure
     steps:
       # The build needs over 20 GB.
       - name: Free disk space

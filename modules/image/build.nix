@@ -75,7 +75,7 @@ in
           NIXSAPOS_CLOSURE_INFO = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel ]; };
           NIXSAPOS_ESP_SIZE = config.nixsapos.image.partitions."10-esp".SizeMaxBytes;
           NIXSAPOS_HOST_FLAKE = config.system.build.nixsaposHostFlake;
-          NIXSAPOS_IMAGE_NAME = "nixsapos" + lib.optionalString config.nixsapos.image.encryption.enable "-encrypted";
+          NIXSAPOS_IMAGE_NAME = "nixsapos" + lib.optionalString config.nixsapos.image.encryption.enable "-secure";
           NIXSAPOS_PARTITIONS = config.system.build.nixsaposPartitions;
           # The same compression as the root mount options, for example "zstd:2".
           NIXSAPOS_ROOT_COMPRESSION = lib.removePrefix "compress-force="
