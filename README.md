@@ -22,7 +22,7 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Audio server | PipeWire | PipeWire |
 | Read-only file system | No | No |
 | Root file system | Btrfs | Btrfs |
-| Logs | In RAM (persistent on the secure image) | In RAM (persistent on the encrypted image) |
+| Logs | In RAM (persistent on the secure image) | In RAM (persistent on the secure image) |
 | Root file system resize | During the first-time setup | Automatic on first boot |
 | Encrypted file system | Yes (secure image) | Yes (secure image) |
 | System rollbacks | Btrfs snapshots (Snapper) | NixOS generations |
@@ -34,7 +34,7 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Number of installed packages | Small (minimal image) or Large (performance and secure images) | Small |
 | Productivity applications | Small (minimal image) or Large (performance and secure images) | Small (`minimal`) or Large (`free` or `unfree`) |
 | Gaming applications | Small (minimal image) or Large (performance and secure images) | Small (`minimal`) or Large (`free` or `unfree`) |
-| Image types | Minimal, performance, and secure | One (minimal) |
+| Image types | Minimal, performance, and secure | Minimal and secure |
 | Linux kernels | Linux LTS and Linux Nobara | Latest stable Linux |
 | Additional hardware drivers (Apple Intel Mac, ASUS, AYANEO, Framework Computer, Microsoft Surface, and more) | Yes | No |
 | Desktop environment | KDE Plasma 6 | KDE Plasma 6 |
@@ -47,7 +47,7 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Unique UUIDs per flashed drive | No | Partition UUIDs (regenerated on first boot) |
 | First-time setup wizard | Yes | No |
 | Build method | Container or virtual machine | Container |
-| Pre-built release image | Yes (minimal and performance) | Yes |
+| Pre-built release image | Yes (minimal and performance) | Yes (minimal and secure) |
 
 
 ## Missing Features
@@ -59,7 +59,6 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Dual-boot support (os-prober) and the Calamares installer.
     - Ventoy support.
 - **Storage**
-    - A published encrypted image. It can be built, but is not released yet.
     - Some additional file systems: APFS, FATX, GlusterFS, HFS+, ZFS, s3fs, and more. nixsapOS supports Bcachefs, Btrfs, CIFS/SMB, EROFS, exFAT, F2FS, FAT, JFS, NFS, NTFS, SSHFS, and XFS.
 - **Gaming**
     - EmuDeck. nixsapOS has RetroArch and RetroDECK instead.
@@ -81,4 +80,5 @@ These are the major winesapOS features that nixsapOS does not have yet.
 - **Security (secure image)**
     - AppArmor, firewalld, CPU mitigations, and forced password resets.
 - **Distribution formats**
+    - Published images. The minimal and secure images can be built, but neither is released yet.
     - Root file system tarball, container image, and Windows Subsystem for Linux (WSL).
