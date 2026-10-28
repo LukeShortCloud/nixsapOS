@@ -39,7 +39,7 @@
         ./templates/host/configuration.nix
       ];
     };
-    # The secure image: the same system with an encrypted root partition, like the winesapOS secure image.
+    # The secure image: the same system with an encrypted root partition.
     # The build writes `true` into its /etc/nixos/configuration.nix.
     nixosConfigurations.nixsapos-secure = self.nixosConfigurations.nixsapos.extendModules {
       modules = [ { nixsapos.image.encryption.enable = nixpkgs.lib.mkForce true; } ];

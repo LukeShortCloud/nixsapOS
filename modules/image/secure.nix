@@ -6,7 +6,7 @@ in
 {
   config = lib.mkMerge [
     {
-      # Only the secure image has a firewall, like winesapOS.
+      # Only the secure image has a firewall.
       networking.firewall.enable = lib.mkDefault secure;
     }
     (lib.mkIf secure {
