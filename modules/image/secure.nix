@@ -1,24 +1,39 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
+let
+  secure = config.nixsapos.image.encryption.enable;
+in
 {
-  config = lib.mkIf config.nixsapos.image.encryption.enable {
-    # "sudo" asks for the user's password.
-    security.sudo.wheelNeedsPassword = true;
+  config = lib.mkMerge [
+    {
+      # Only the secure image has a firewall, like winesapOS.
+      networking.firewall.enable = lib.mkDefault secure;
+    }
+    (lib.mkIf secure {
+      # "sudo" asks for the user's password.
+      security.sudo.wheelNeedsPassword = true;
 
-    # Keep KWallet on so apps store their passwords encrypted. The minimal image turns it off (modules/system/desktop.nix).
-    environment.etc."xdg/kwalletrc".enable = false;
+      # Enable firewalld including the KDE Plasma "Firewall" application.
+      services.firewalld.enable = true;
+      # firewalld requires nftables.
+      networking.nftables.enable = true;
+      environment.systemPackages = [ pkgs.kdePackages.plasma-firewall ];
 
-    # Disable clipboard history.
-    environment.etc."xdg/klipperrc".text = lib.generators.toINI { } {
-      General = {
-        KeepClipboardContents = false;
-        MaxClipItems = 1;
-        NoEmptyClipboard = false;
+      # Keep KWallet on so apps store their passwords encrypted. The minimal image turns it off (modules/system/desktop.nix).
+      environment.etc."xdg/kwalletrc".enable = false;
+
+      # Disable clipboard history.
+      environment.etc."xdg/klipperrc".text = lib.generators.toINI { } {
+        General = {
+          KeepClipboardContents = false;
+          MaxClipItems = 1;
+          NoEmptyClipboard = false;
+        };
       };
-    };
-    # Klipper always writes the clipboard to a database file. Keep it in RAM instead.
-    environment.etc."environment.d/60-nixsapos-klipper.conf".text = ''
-      KLIPPER_DATABASE=''${XDG_RUNTIME_DIR}/klipper/history3.sqlite
-    '';
-  };
+      # Klipper always writes the clipboard to a database file. Keep it in RAM instead.
+      environment.etc."environment.d/60-nixsapos-klipper.conf".text = ''
+        KLIPPER_DATABASE=''${XDG_RUNTIME_DIR}/klipper/history3.sqlite
+      '';
+    })
+  ];
 }

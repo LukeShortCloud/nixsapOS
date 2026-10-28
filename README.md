@@ -25,6 +25,7 @@ The nixsapOS column describes the planned proof-of-concept. It is updated as fea
 | Logs | In RAM (persistent on the secure image) | In RAM (persistent on the secure image) |
 | Root file system resize | During the first-time setup | Automatic on first boot |
 | Encrypted file system | Yes (secure image) | Yes (secure image) |
+| Firewall | firewalld (secure image) | firewalld (secure image) |
 | System rollbacks | Btrfs snapshots (Snapper) | NixOS generations |
 | Backups of `/home/` | Btrfs snapshots (Snapper) | Btrfs snapshots (Snapper) |
 | Package managers (CLI) | flatpak, homebrew, nix, pacman, paru and yay (AUR), and snap | flatpak and nix |
@@ -78,7 +79,7 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - The first-time setup wizard.
     - The winesapOS Upgrade wizard.
 - **Security (secure image)**
-    - AppArmor, firewalld, and forced password resets.
+    - AppArmor and forced password resets.
 - **Distribution formats**
     - Published images. The minimal and secure images can be built, but neither is released yet.
     - Root file system tarball, container image, and Windows Subsystem for Linux (WSL).
