@@ -19,6 +19,10 @@ in
       networking.nftables.enable = true;
       environment.systemPackages = [ pkgs.kdePackages.plasma-firewall ];
 
+      # Only a subset of AppArmor profiles are applied.
+      # NixOS uses non-standard paths so most community profiles will need to be modified.
+      security.apparmor.enable = true;
+
       # Keep KWallet on so apps store their passwords encrypted. The minimal image turns it off (modules/system/desktop.nix).
       environment.etc."xdg/kwalletrc".enable = false;
 

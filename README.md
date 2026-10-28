@@ -79,7 +79,7 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - The first-time setup wizard.
     - The winesapOS Upgrade wizard.
 - **Security (secure image)**
-    - AppArmor and forced password resets.
+    - Forced password resets.
 - **Distribution formats**
     - Published images. The minimal and secure images can be built, but neither is released yet.
     - Root file system tarball, container image, and Windows Subsystem for Linux (WSL).
