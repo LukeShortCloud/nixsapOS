@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.nixsapos.portableHardware;
@@ -9,6 +9,11 @@ in
   config = lib.mkIf cfg.enable {
     # Bluetooth with the adapter powered on at boot. Plasma adds its Bluetooth settings and applet when this is on.
     hardware.bluetooth.enable = true;
+
+    # iPhone and iPad support: files in Dolphin, USB tethering, and the "idevice*" command line tools.
+    # usbmuxd talks to the device over USB. Plasma's kio-extras already uses it to show the device in Dolphin.
+    services.usbmuxd.enable = true;
+    environment.systemPackages = [ pkgs.libimobiledevice ];
 
     # "tlp-pd" lets Plasma's battery applet switch between the power profiles. It replaces power-profiles-daemon.
     # Its profiles use TLP's settings: performance = "_AC", balanced = "_BAT", and power saver = "_SAV".
