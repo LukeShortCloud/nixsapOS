@@ -63,7 +63,24 @@ in
       # Rules for many more controllers. They need the virtual input device (uinput).
       services.udev.packages = [ pkgs.game-devices-udev-rules ];
       hardware.uinput.enable = true;
+
+      # Give the game in the foreground more VRAM than background apps using the kernel's dmem cgroups.
+      # dmemcg-booster does this for Gamescope sessions. plasma-foreground-booster does this for KDE Plasma sessions.
+      # The services need "wantedBy" because NixOS ignores their [Install] sections.
+      systemd.packages = [ pkgs.jovianPackages.dmemcg-booster ];
+      systemd.services.dmemcg-booster-system = {
+        overrideStrategy = "asDropin";
+        wantedBy = [ "multi-user.target" ];
+      };
     }
+    (lib.mkIf config.services.desktopManager.plasma6.enable {
+      environment.systemPackages = [ pkgs.jovianPackages.plasma-foreground-booster ];
+      systemd.user.services.plasma-foreground-booster = {
+        overrideStrategy = "asDropin";
+        # Only start it in Plasma sessions. It needs Plasma's window management.
+        wantedBy = [ "plasma-workspace.target" ];
+      };
+    })
     (lib.mkIf free {
       environment.systemPackages = with pkgs; [
         # Controller and racing wheel tools.

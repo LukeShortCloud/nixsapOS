@@ -5,18 +5,23 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     # Declarative Flatpaks (services.flatpak.packages). Pinned to a release.
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.8.0";
+    # Steam Deck packages that are not in nixpkgs, such as dmemcg-booster. Only its packages are used; its modules are all off by default.
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, nix-flatpak }: {
+  outputs = { self, nixpkgs, nix-flatpak, jovian }: {
     # Reusable NixOS modules. Other flakes can import these.
     nixosModules = {
-      # The gaming module installs Flatpaks declaratively, so nix-flatpak comes with it.
+      # The gaming module installs Flatpaks declaratively and uses Jovian-NixOS packages, so both come with it.
       # NixOS loads the same module path only once, even when it is imported twice.
       default = {
-        imports = [ ./modules nix-flatpak.nixosModules.nix-flatpak ];
+        imports = [ ./modules nix-flatpak.nixosModules.nix-flatpak jovian.nixosModules.default ];
       };
       gaming = {
-        imports = [ ./modules/features/gaming.nix nix-flatpak.nixosModules.nix-flatpak ];
+        imports = [ ./modules/features/gaming.nix nix-flatpak.nixosModules.nix-flatpak jovian.nixosModules.default ];
       };
       graphics-foss = ./modules/features/graphics-foss.nix;
       # The drive. It also keeps this nixsapOS source in every generation, so /etc/nixos can rebuild offline.
