@@ -145,6 +145,11 @@ in
         # "Game Mode" like on the Steam Deck, on the login screen.
         gamescopeSession.enable = true;
       };
+      # Decky Loader adds plugins to Steam's Game Mode. The service runs as root and runs plugins as the "decky" user.
+      jovian.decky-loader.enable = true;
+      # Decky Loader needs Steam's CEF remote debugging. Steam turns it on when this file exists in its directory.
+      # It lets local programs control the Steam client through a port on localhost.
+      systemd.user.tmpfiles.rules = [ "f %h/.local/share/Steam/.cef-enable-remote-debugging" ];
       environment.systemPackages = [ pkgs.discord ];
       # The Xbox wireless USB dongle for PC has proprietary firmware.
       # It turns off the mt76x2u and xpad drivers.

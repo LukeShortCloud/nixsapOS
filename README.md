@@ -64,7 +64,6 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Some additional file systems: APFS, FATX, GlusterFS, HFS+, ZFS, s3fs, and more. nixsapOS supports Bcachefs, Btrfs, CIFS/SMB, EROFS, exFAT, F2FS, FAT, JFS, NFS, NTFS, SSHFS, and XFS.
 - **Gaming**
     - EmuDeck. nixsapOS has RetroArch and RetroDECK instead.
-    - Decky Loader.
     - NonSteamLaunchers (Steam can already add other games), RemotePlayWhatever (broken upstream), and GameImage (it can be downloaded). They are not planned.
     - The Nexus Mods app. It was discontinued upstream.
 - **Productivity**
