@@ -15,6 +15,8 @@ root_size="$(( nar_size * 5 / 4 ))"
 esp_size="$(numfmt --from=iec "${NIXSAPOS_ESP_SIZE}")"
 
 mkdir -p "${output_dir}"
+# cryptsetup needs this for its LUKS2 locks.
+mkdir -p /run/cryptsetup/
 rm -f "${image}"
 # Create the partition table and the labelled, formatted partitions.
 systemd-repart \
