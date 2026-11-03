@@ -79,7 +79,7 @@ Test it with `go-task vm:secure` or `scripts/nixsapos-test-vm.sh ~/.cache/nixsap
 Every later boot asks for the drive password. Other differences from the minimal image:
 
 - A firewall (firewalld), with a Firewall page in System Settings. The minimal image has none.
-- AppArmor is on, but it only confines the few programs that NixOS modules add profiles for, such as Waydroid.
+- AppArmor is on but it only confines programs that NixOS modules add profiles for. With `free` and `unfree` packages, there are profiles loaded for the LXC containers that Waydroid uses. With `minimal` packages, no profiles are loaded.
 - `sudo` asks for the user's password. It is still the default `nixsap` until the first-time setup can change it.
 - Logs are kept on the drive instead of in RAM.
 - CPU vulnerability mitigations stay on.
