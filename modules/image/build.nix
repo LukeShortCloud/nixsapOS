@@ -3,21 +3,8 @@
 let
   flake = config.nixsapos.image.flake;
   template = "${flake}/templates/host";
-  # Pin /etc/nixos to the nixsapOS source in the image so that it rebuilds offline.
-  # `nix flake update` switches it to the newest nixsapOS from the template's URL.
-  hostLock = {
-    version = 7;
-    root = "root";
-    nodes = {
-      root.inputs.nixsapos = "nixsapos";
-      nixsapos = {
-        inputs.nixpkgs = "nixpkgs";
-        locked = { type = "path"; path = flake.outPath; inherit (flake) narHash; };
-        original = builtins.parseFlakeRef (import "${template}/flake.nix").inputs.nixsapos.url;
-      };
-      nixpkgs = (lib.importJSON "${flake}/flake.lock").nodes.nixpkgs;
-    };
-  };
+  # A flake's source and the sources of its inputs, and of their inputs.
+  flakeSources = f: [ f.outPath ] ++ lib.concatMap flakeSources (lib.attrValues (f.inputs or { }));
   # The template's configuration.nix, with the encryption setting of this image.
   encryptionSetting = enable: "nixsapos.image.encryption.enable = ${lib.boolToString enable};";
   templateConfiguration = builtins.readFile "${template}/configuration.nix";
@@ -45,13 +32,12 @@ in
         (lib.mapAttrs (name: settings: { Partition = settings // { UUID = "null"; }; }) config.nixsapos.image.partitions);
     }
     (lib.mkIf (flake != null) {
-      # Keep the nixsapOS source in every generation so /etc/nixos can always rebuild offline.
-      system.extraDependencies = [ flake.outPath ];
+      # Keep the nixsapOS source and the sources of all of its inputs in every generation so /etc/nixos can always rebuild offline.
+      system.extraDependencies = lib.unique (flakeSources flake);
 
-      # The host flake copied to /etc/nixos: the template plus its lock file and the encryption setting.
+      # The host flake copied to /etc/nixos: the template with the encryption setting. The build script locks it.
       system.build.nixsaposHostFlake = pkgs.runCommand "nixsapos-host-flake" { } ''
         cp --recursive --no-preserve=mode ${template} $out
-        cp ${pkgs.writeText "flake.lock" (builtins.toJSON hostLock)} $out/flake.lock
         cp ${hostConfiguration} $out/configuration.nix
       '';
 
@@ -74,6 +60,7 @@ in
         runtimeEnv = {
           NIXSAPOS_CLOSURE_INFO = pkgs.closureInfo { rootPaths = [ config.system.build.toplevel ]; };
           NIXSAPOS_ESP_SIZE = config.nixsapos.image.partitions."10-esp".SizeMaxBytes;
+          NIXSAPOS_FLAKE_SOURCE = flake.outPath;
           NIXSAPOS_HOST_FLAKE = config.system.build.nixsaposHostFlake;
           NIXSAPOS_IMAGE_NAME = "nixsapos" + lib.optionalString config.nixsapos.image.encryption.enable "-secure";
           NIXSAPOS_PARTITIONS = config.system.build.nixsaposPartitions;

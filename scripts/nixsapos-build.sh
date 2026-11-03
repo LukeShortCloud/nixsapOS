@@ -54,6 +54,11 @@ mount -o umask=0077 "${loop_device}p1" "${root_dir}/boot"
 # The flake that the installed system rebuilds from.
 mkdir "${root_dir}/etc"
 cp --recursive --no-preserve=mode "${NIXSAPOS_HOST_FLAKE}" "${root_dir}/etc/nixos"
+# Lock it to the nixsapOS source in the image so that it rebuilds offline. The other inputs come from nixsapOS's own lock file.
+# The lock keeps the template's URL as the original. `nix flake update` switches it to the newest nixsapOS.
+nix --extra-experimental-features "nix-command flakes" flake lock --offline \
+    --override-input nixsapos "path:${NIXSAPOS_FLAKE_SOURCE}" \
+    "path:${root_dir}/etc/nixos"
 
 # Install the system the same way as on a real computer, including the bootloader.
 nixos-install \
