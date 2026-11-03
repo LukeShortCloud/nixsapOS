@@ -41,6 +41,12 @@ in
       # Add the Flathub remote without a network connection or first-boot service.
       # Flatpak adds every remote in this directory when it creates the system installation.
       environment.etc."flatpak/remotes.d/flathub.flatpakrepo".source = ../../rootfs/etc/flatpak/remotes.d/flathub.flatpakrepo;
+      # The document portal can hang while unmounting /run/user/<UID>/doc when logging out.
+      # It has a 90 seconds timeout by default.
+      systemd.user.services.xdg-document-portal = {
+        overrideStrategy = "asDropin";
+        serviceConfig.TimeoutStopSec = "5s";
+      };
 
       # The Plasma meta package does not provide any web browser.
       programs.firefox = {
