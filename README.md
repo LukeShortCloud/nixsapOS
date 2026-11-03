@@ -5,8 +5,25 @@ nixsapOS is a portable [NixOS](https://nixos.org/) distribution that runs direct
 **TABLE OF CONTENTS**
 
 * [nixsapOS](#nixsapos)
+   * [Building](#building)
    * [Comparison with winesapOS](#comparison-with-winesapos)
    * [Missing Features](#missing-features)
+
+
+## Building
+
+nixsapOS is built in a privileged container with Podman (recommended) or Docker. With [Task](https://taskfile.dev/) installed, build the images from the repository root:
+
+```
+$ go-task build:minimal
+```
+```
+$ go-task build:secure
+```
+
+The images are written to `~/.cache/nixsapos/nixsapos.img` and `~/.cache/nixsapos/nixsapos-secure.img`. Boot one in a virtual machine with `go-task vm:minimal` or `go-task vm:secure`. Run `go-task` to list every task.
+
+[CONTRIBUTING.md](CONTRIBUTING.md#building-the-image) has the manual Podman and Docker commands and explains the build.
 
 
 ## Comparison with winesapOS

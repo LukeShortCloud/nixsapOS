@@ -2,6 +2,7 @@
 
 * [Contributing to nixsapOS](#contributing-to-nixsapos)
    * [Building the Image](#building-the-image)
+      * [Task](#task)
       * [Podman](#podman)
       * [Docker](#docker)
       * [Secure Image](#secure-image)
@@ -21,6 +22,24 @@ The image is written to `~/.cache/nixsapos/nixsapos.img` (or `$XDG_CACHE_HOME/ni
 
 The images are kept outside the repository on purpose. A `path:` flake reference copies the whole directory into the Nix store, ignoring `.gitignore`. Every evaluation would copy them (about 10 GB each). The build stops if `NIXSAPOS_OUTPUT_DIR` is missing or inside the repository.
 
+### Task
+
+[Task](https://taskfile.dev/) runs the commands in this document for you. They are defined in `Taskfile.yml`. Install it from your distribution (the package is usually named `go-task`) or from nixpkgs (`nix shell nixpkgs#go-task`). Some distributions and nixpkgs name the command `task` instead of `go-task`. Run it from the repository root. Run `go-task` with no arguments to list every task:
+
+| Task | What it does (and where the manual steps are) |
+| --- | --- |
+| `go-task builder` | Create the builder container image ([Podman](#podman)). |
+| `go-task build:minimal` | Build the minimal image ([Podman](#podman)). |
+| `go-task build:secure` | Build the secure image ([Secure Image](#secure-image)). |
+| `go-task build:all` | Build both images, one after the other. |
+| `go-task check` | Run `nix flake check` in the builder container ([GitHub Actions](#github-actions)). |
+| `go-task vm:minimal` and `go-task vm:secure` | Boot an image in a virtual machine ([Testing the Image](#testing-the-image)). |
+| `go-task cache:clean` and `go-task cache:delete` | Free up space in the Nix store volume or delete it ([Build Cache](#build-cache)). |
+| `go-task update:inputs` | Update the flake inputs in `flake.lock`. |
+| `go-task act:check` and `go-task act:build` | Run the workflows locally ([Testing Workflows Locally](#testing-workflows-locally)). |
+
+The tasks use Podman when it is installed. Add `CONTAINER=docker` to use Docker instead, for example `go-task build:minimal CONTAINER=docker`.
+
 ### Podman
 
 Podman is the recommended tool. It must run as root (`sudo`), because rootless containers cannot use loop devices.
@@ -29,7 +48,7 @@ Podman is the recommended tool. It must run as root (`sudo`), because rootless c
 output_dir="${XDG_CACHE_HOME:-$HOME/.cache}/nixsapos"
 mkdir -p "${output_dir}"
 sudo podman build -t nixsapos-builder build/
-sudo podman run --rm --privileged -v /dev:/dev -v nixsapos-nix:/nix -v "$(pwd)":/workdir:z -w /workdir -v "${output_dir}":/output:z -e NIXSAPOS_OUTPUT_DIR=/output nixsapos-builder nix run .#nixsapos-build
+sudo podman run --rm --privileged -v /dev:/dev -v nixsapos-nix:/nix -v "$(pwd)":/workdir -w /workdir -v "${output_dir}":/output -e NIXSAPOS_OUTPUT_DIR=/output nixsapos-builder nix run .#nixsapos-build
 ```
 
 Podman needs the output directory to exist, which is why it is created first.
@@ -47,11 +66,11 @@ Docker looks for a file named `Dockerfile` by default. The `Containerfile` is pa
 
 ### Secure Image
 
-The secure image is the same system with a LUKS2-encrypted root partition. Build it with the same Podman or Docker command, but end it with `nix run .#nixsapos-build-secure` instead of `nix run .#nixsapos-build`.
+The secure image is the same system with a LUKS2-encrypted root partition. Build it with `go-task build:secure`. The manual Podman or Docker command is the same as for the minimal image, but ends with `nix run .#nixsapos-build-secure` instead of `nix run .#nixsapos-build`.
 
 The build will be available at: `~/.cache/nixsapos/nixsapos-secure.img`.
 
-Test it with `scripts/nixsapos-test-vm.sh ~/.cache/nixsapos/nixsapos-secure.img`. The image has an empty password. It can be flashed and booted without one. The first boot:
+Test it with `go-task vm:secure` or `scripts/nixsapos-test-vm.sh ~/.cache/nixsapos/nixsapos-secure.img`. The image has an empty password. It can be flashed and booted without one. The first boot:
 
 1. Asks for a new drive password twice, on the console before root is mounted.
 2. Gives the drive its own volume key, by re-encrypting the used part of root. This takes about 1.5 minutes and up to 1 GB of memory for an 8 GiB root, and it continues after a power loss.
@@ -72,8 +91,8 @@ The secure-image-only settings are in `modules/image/secure.nix`, apart from the
 
 The `nixsapos-nix` volume keeps the Nix store between builds. The first build downloads every package. Later builds only download and build what changed, for example about 2 minutes instead of 10.
 
-- Delete the volume after changing `build/Containerfile`, because the volume also holds the container's own copy of Nix: `sudo podman volume rm nixsapos-nix` or `sudo docker volume rm nixsapos-nix`.
-- Free up space by removing old packages from the volume: add `nix-collect-garbage` instead of `nix run .#nixsapos-build` to the end of the `run` command.
+- Delete the volume after changing `build/Containerfile`, because the volume also holds the container's own copy of Nix: `go-task cache:delete`, `sudo podman volume rm nixsapos-nix` or `sudo docker volume rm nixsapos-nix`.
+- Free up space by removing old packages from the volume: `go-task cache:clean`, or add `nix-collect-garbage` instead of `nix run .#nixsapos-build` to the end of the `run` command.
 - Leave out `-v nixsapos-nix:/nix` to build without a cache.
 
 ### Git
@@ -119,8 +138,10 @@ Prefer a NixOS option when one exists for the setting, such as `services.display
 Boot the image in a QEMU virtual machine with UEFI firmware:
 
 ```
-scripts/nixsapos-test-vm.sh
+$ go-task vm:minimal
 ```
+
+The manual command is `scripts/nixsapos-test-vm.sh`.
 
 It never changes `~/.cache/nixsapos/nixsapos.img`. It boots a copy in `~/.cache/nixsapos/vm/`, grown to 32 GB like a bigger USB drive, with empty UEFI variables like a new PC. The comments at the top of the script list its settings.
 
@@ -128,12 +149,12 @@ It never changes `~/.cache/nixsapos/nixsapos.img`. It boots a copy in `~/.cache/
 
 Workflows are in `.github/workflows/`. They use the same builder container as local builds.
 
-- `check.yml` runs `nix flake check` on every push and pull request. It evaluates every flake output and runs the checks for the reusable modules in `checks/`. It does not build the image.
+- `check.yml` runs `nix flake check` on every push and pull request. It evaluates every flake output and runs the checks for the reusable modules in `checks/`. It does not build the image. Run the same check locally with `go-task check`.
 - `image.yml` builds both images, minimal and secure, with the same `docker run` command as a local build, on every push that changes more than Markdown files. It builds them one after the other. It checks that the images build. It does not upload them.
 
 ### Testing Workflows Locally
 
-[act](https://github.com/nektos/act) runs GitHub Actions workflows in containers on your own computer. Get it from the nixpkgs version pinned in `flake.lock`, and point it at the Podman API socket:
+[act](https://github.com/nektos/act) runs GitHub Actions workflows in containers on your own computer. `go-task act:check` and `go-task act:build` run the commands below. To run them manually, get act from the nixpkgs version pinned in `flake.lock`, and point it at the Podman API socket:
 
 ```
 act="$(nix --extra-experimental-features 'nix-command flakes' build --no-link --print-out-paths --inputs-from "git+file://$(pwd)" nixpkgs#act)"

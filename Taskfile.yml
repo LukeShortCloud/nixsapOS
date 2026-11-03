@@ -1,0 +1,123 @@
+# nixsapOS Taskfile
+# https://taskfile.dev
+# Run `go-task` (or `task`) with no arguments to list the tasks.
+
+version: "3"
+
+vars:
+  GOTASK:
+    sh: if command -v go-task >/dev/null; then echo go-task; else echo task; fi
+  # Podman is preferred. Use Docker by adding `CONTAINER=docker` to the task command.
+  CONTAINER:
+    sh: if command -v podman >/dev/null; then echo podman; else echo docker; fi
+  BUILDER: nixsapos-builder
+  # Keeps the Nix store between builds.
+  NIX_VOLUME: nixsapos-nix
+  # Outside the repository, because a `path:` flake reference would copy the images into the Nix store.
+  OUTPUT_DIR:
+    sh: echo "${XDG_CACHE_HOME:-${HOME}/.cache}/nixsapos"
+  NIX: nix --extra-experimental-features 'nix-command flakes'
+  ACT_RUNNER: ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04
+
+tasks:
+  default:
+    aliases:
+      - help
+    cmds:
+      - "{{.GOTASK}} --list"
+
+  builder:
+    desc: Create the builder container image from build/Containerfile.
+    cmds:
+      - sudo {{.CONTAINER}} build -t {{.BUILDER}} -f "{{.ROOT_DIR}}/build/Containerfile" "{{.ROOT_DIR}}/build/"
+
+  image:build:
+    internal: true
+    requires:
+      vars:
+        - PACKAGE
+    deps:
+      - builder
+    cmds:
+      # Podman needs the output directory to exist.
+      - mkdir -p "{{.OUTPUT_DIR}}"
+      - |
+        sudo {{.CONTAINER}} run --rm --privileged -v /dev:/dev -v {{.NIX_VOLUME}}:/nix \
+          -v "{{.ROOT_DIR}}":/workdir -w /workdir \
+          -v "{{.OUTPUT_DIR}}":/output -e NIXSAPOS_OUTPUT_DIR=/output \
+          {{.BUILDER}} nix run .#{{.PACKAGE}}
+
+  build:minimal:
+    desc: Build the minimal image (~/.cache/nixsapos/nixsapos.img).
+    cmds:
+      - task: image:build
+        vars:
+          PACKAGE: nixsapos-build
+
+  build:secure:
+    desc: Build the secure image (~/.cache/nixsapos/nixsapos-secure.img).
+    cmds:
+      - task: image:build
+        vars:
+          PACKAGE: nixsapos-build-secure
+
+  build:all:
+    desc: Build the minimal and secure images, one after the other.
+    cmds:
+      # One at a time, because both builds use the same Nix store volume.
+      - task: build:minimal
+      - task: build:secure
+
+  check:
+    desc: Evaluate every flake output and run the module checks (nix flake check) in the builder container.
+    deps:
+      - builder
+    cmds:
+      - sudo {{.CONTAINER}} run --rm -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} nix flake check
+
+  vm:minimal:
+    desc: Boot a copy of the minimal image in a QEMU virtual machine.
+    cmds:
+      - '"{{.ROOT_DIR}}/scripts/nixsapos-test-vm.sh" "{{.OUTPUT_DIR}}/nixsapos.img"'
+
+  vm:secure:
+    desc: Boot a copy of the secure image in a QEMU virtual machine.
+    cmds:
+      - '"{{.ROOT_DIR}}/scripts/nixsapos-test-vm.sh" "{{.OUTPUT_DIR}}/nixsapos-secure.img"'
+
+  cache:clean:
+    desc: Free up space by removing old packages from the Nix store volume.
+    deps:
+      - builder
+    cmds:
+      - sudo {{.CONTAINER}} run --rm -v {{.NIX_VOLUME}}:/nix {{.BUILDER}} nix-collect-garbage
+
+  cache:delete:
+    desc: Delete the Nix store volume. Required after changing build/Containerfile.
+    cmds:
+      - sudo {{.CONTAINER}} volume rm {{.NIX_VOLUME}}
+
+  update:inputs:
+    desc: Update the flake inputs in flake.lock (uses Nix on the host).
+    cmds:
+      - "{{.NIX}} flake update --flake \"git+file://{{.ROOT_DIR}}\""
+
+  act:check:
+    desc: Run the check workflow locally with act and rootless Podman (uses Nix on the host).
+    vars:
+      ACT:
+        sh: nix --extra-experimental-features 'nix-command flakes' build --no-link --print-out-paths --inputs-from "git+file://{{.ROOT_DIR}}" nixpkgs#act
+    cmds:
+      - systemctl --user start podman.socket
+      - defer: systemctl --user stop podman.socket
+      - DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock" "{{.ACT}}/bin/act" push --job check -P {{.ACT_RUNNER}}
+
+  act:build:
+    desc: Run the image workflow locally with act and rootful Podman. The images go to ../nixsapos-output/.
+    vars:
+      ACT:
+        sh: nix --extra-experimental-features 'nix-command flakes' build --no-link --print-out-paths --inputs-from "git+file://{{.ROOT_DIR}}" nixpkgs#act
+    cmds:
+      - sudo systemctl start podman.socket
+      - defer: sudo systemctl stop podman.socket
+      - sudo DOCKER_HOST="unix:///run/podman/podman.sock" "{{.ACT}}/bin/act" push --job build --bind -P {{.ACT_RUNNER}}
