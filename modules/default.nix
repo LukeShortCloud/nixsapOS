@@ -1,5 +1,5 @@
 # The nixsapOS profile: distro-specific settings. Exported as `nixosModules.default`.
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -15,21 +15,22 @@
     ./system/users.nix
   ];
 
+  # Defaults are set so that /etc/nixos/configuration.nix can change them.
   nixsapos.gaming = {
-    enable = true;
+    enable = lib.mkDefault true;
     # "minimal" (default), "free" or "unfree".
-    selection = "minimal";
+    selection = lib.mkDefault "minimal";
   };
-  nixsapos.graphicsFoss.enable = true;
+  nixsapos.graphicsFoss.enable = lib.mkDefault true;
   nixsapos.plasma = {
-    enable = true;
-    passwordlessLogin = true;
+    enable = lib.mkDefault true;
+    passwordlessLogin = lib.mkDefault true;
   };
-  nixsapos.portableHardware.enable = true;
+  nixsapos.portableHardware.enable = lib.mkDefault true;
   nixsapos.productivity = {
-    enable = true;
+    enable = lib.mkDefault true;
     # "minimal" (default), "free" or "unfree".
-    selection = "minimal";
+    selection = lib.mkDefault "minimal";
   };
 
   # git is required for some NixOS operations.
