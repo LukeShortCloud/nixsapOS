@@ -15,6 +15,11 @@ in
     services.usbmuxd.enable = true;
     environment.systemPackages = [ pkgs.libimobiledevice ];
 
+    # Fingerprint readers. Users add a fingerprint in System Settings > Users. It then unlocks the screen and works with "sudo".
+    services.fprintd.enable = true;
+    # Only use a password for the login screen and the console. A fingerprint check there blocks typing the password until it times out.
+    security.pam.services.login.fprintAuth = false;
+
     # "tlp-pd" lets Plasma's battery applet switch between the power profiles. It replaces power-profiles-daemon.
     # Its profiles use TLP's settings: performance = "_AC", balanced = "_BAT", and power saver = "_SAV".
     services.power-profiles-daemon.enable = false;
