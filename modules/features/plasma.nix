@@ -47,6 +47,13 @@ in
         overrideStrategy = "asDropin";
         serviceConfig.TimeoutStopSec = "5s";
       };
+      # DrKonqi's check for crashes from before the login only exits after it finds one.
+      # Otherwise, it gets stopped after 30 minutes and shows as a false-positive failed service.
+      # This is only an issue on the minimal (not secure) image where logs are volatile.
+      systemd.user.services.drkonqi-coredump-pickup = {
+        overrideStrategy = "asDropin";
+        serviceConfig.RuntimeMaxSec = "infinity";
+      };
 
       # The Plasma meta package does not provide any web browser.
       programs.firefox = {
