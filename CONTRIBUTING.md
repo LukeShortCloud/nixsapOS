@@ -34,6 +34,7 @@ The images are kept outside the repository on purpose. A `path:` flake reference
 | `go-task build:all` | Build both images, one after the other. |
 | `go-task check` | Run `nix flake check` in the builder container ([GitHub Actions](#github-actions)). |
 | `go-task vm:minimal` and `go-task vm:secure` | Boot an image in a virtual machine ([Testing the Image](#testing-the-image)). |
+| `go-task test HOST=<USER>@<IP_ADDRESS>` | Run the runtime checks on a booted drive over SSH ([Testing the Image](#testing-the-image)). |
 | `go-task cache:clean` and `go-task cache:delete` | Free up space in the Nix store volume or delete it ([Build Cache](#build-cache)). |
 | `go-task update:inputs` | Update the flake inputs in `flake.lock`. |
 | `go-task act:check` and `go-task act:build` | Run the workflows locally ([Testing Workflows Locally](#testing-workflows-locally)). |
@@ -144,6 +145,20 @@ $ go-task vm:minimal
 The manual command is `scripts/nixsapos-test-vm.sh`.
 
 It never changes `~/.cache/nixsapos/nixsapos.img`. It boots a copy in `~/.cache/nixsapos/vm/`, grown to 32 GB like a bigger USB drive, with empty UEFI variables like a new PC. The comments at the top of the script list its settings.
+
+`scripts/nixsapos-tests.sh` checks a booted drive after its first boot: the partitions, mounts, services, kernel parameters, and an offline rebuild of `/etc/nixos`. It knows the differences between the minimal and secure images. It prints one PASS or FAIL line per check. Its exit code is the number of failed checks. `nix flake check` already covers the configuration itself, so the script only checks what shows at runtime.
+
+Run it on the drive itself with `sudo scripts/nixsapos-tests.sh`, or from another computer over SSH:
+
+```
+$ go-task test HOST=nixsap@<IP_ADDRESS>
+```
+
+sshd is installed but does not start by default. Start it on the drive first with `sudo systemctl start sshd`. The virtual machine forwards port 2222 on this computer to its SSH port:
+
+```
+$ go-task test HOST=nixsap@localhost SSH_PORT=2222
+```
 
 ## GitHub Actions
 

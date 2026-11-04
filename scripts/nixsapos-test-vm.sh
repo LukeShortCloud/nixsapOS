@@ -9,6 +9,8 @@
 #   NIXSAPOS_VM_DISK_SIZE  Size of the virtual drive, to test growing the root partition (default: 32G).
 #   NIXSAPOS_VM_MEMORY     RAM for the virtual machine (default: 4G).
 #   NIXSAPOS_VM_HEADLESS   Set to 1 to use the serial console in the terminal instead of a window.
+#   NIXSAPOS_VM_SSH_PORT   The port on this computer for SSH to the virtual machine (default: 2222).
+#                          sshd does not start by default. Start it in the virtual machine with `sudo systemctl start sshd`.
 
 set -euo pipefail
 
@@ -19,6 +21,7 @@ image="${1:-${cache_dir}/nixsapos.img}"
 vm_dir="${NIXSAPOS_VM_DIR:-${cache_dir}/vm}"
 disk_size="${NIXSAPOS_VM_DISK_SIZE:-32G}"
 memory="${NIXSAPOS_VM_MEMORY:-4G}"
+ssh_port="${NIXSAPOS_VM_SSH_PORT:-2222}"
 
 # Use QEMU and OVMF from the nixpkgs version pinned in flake.lock.
 nix_build() {
@@ -48,5 +51,5 @@ exec "${qemu}/bin/qemu-system-x86_64" \
     -drive "if=pflash,format=raw,readonly=on,file=${ovmf}/FV/OVMF_CODE.fd" \
     -drive "if=pflash,format=raw,file=${vm_dir}/vars.fd" \
     -drive "if=virtio,format=raw,file=${vm_dir}/disk.raw" \
-    -nic user,model=virtio-net-pci \
+    -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:${ssh_port}-:22" \
     "${display_args[@]}"

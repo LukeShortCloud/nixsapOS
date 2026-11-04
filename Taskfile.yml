@@ -85,6 +85,18 @@ tasks:
     cmds:
       - '"{{.ROOT_DIR}}/scripts/nixsapos-test-vm.sh" "{{.OUTPUT_DIR}}/nixsapos-secure.img"'
 
+  test:
+    desc: Run scripts/nixsapos-tests.sh on a booted nixsapOS drive over SSH. For example HOST=nixsap@<IP_ADDRESS>, or HOST=nixsap@localhost SSH_PORT=2222 for the virtual machine.
+    requires:
+      vars:
+        - HOST
+    vars:
+      SSH_PORT: '{{.SSH_PORT | default "22"}}'
+    cmds:
+      - scp -P {{.SSH_PORT}} "{{.ROOT_DIR}}/scripts/nixsapos-tests.sh" "{{.HOST}}:/tmp/nixsapos-tests.sh"
+      # A terminal (-t) so that sudo can ask for the password on the secure image.
+      - ssh -t -p {{.SSH_PORT}} "{{.HOST}}" 'sudo bash /tmp/nixsapos-tests.sh; status=$?; rm -f /tmp/nixsapos-tests.sh; exit "${status}"'
+
   cache:clean:
     desc: Free up space by removing old packages from the Nix store volume.
     deps:
