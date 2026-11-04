@@ -46,11 +46,13 @@ in
       erofs = true;
       f2fs = true;
       jfs = true;
-      # This also starts rpcbind, which NFS needs. The firewall blocks its port from other computers.
+      # Only NFSv4 network shares.
       nfs = true;
       ntfs = true;
       sshfs = true;
       xfs = true;
     };
+    # NFS turns on rpcbind. That service listens on port 111 on every network. Disable it for security reasons to force NFSv4 instead.
+    services.rpcbind.enable = lib.mkForce false;
   };
 }

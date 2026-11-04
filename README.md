@@ -78,7 +78,7 @@ These are the major winesapOS features that nixsapOS does not have yet.
     - Dual-boot support (os-prober) and the Calamares installer.
     - Ventoy support.
 - **Storage**
-    - Some additional file systems: APFS, FATX, GlusterFS, HFS+, ZFS, s3fs, and more. nixsapOS supports Bcachefs, Btrfs, CIFS/SMB, EROFS, exFAT, F2FS, FAT, JFS, NFS, NTFS, SSHFS, and XFS.
+    - Some additional file systems: APFS, FATX, GlusterFS, HFS+, ZFS, s3fs, and more. nixsapOS supports Bcachefs, Btrfs, CIFS/SMB, EROFS, exFAT, F2FS, FAT, JFS, NFSv4, NTFS, SSHFS, and XFS.
 - **Gaming**
     - EmuDeck. nixsapOS has RetroArch and RetroDECK instead.
     - NonSteamLaunchers (Steam can already add other games), RemotePlayWhatever (broken upstream), and GameImage (it can be downloaded). They are not planned.
