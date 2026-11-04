@@ -69,11 +69,35 @@ tasks:
       - task: build:secure
 
   check:
-    desc: Evaluate every flake output and run the module checks (nix flake check) in the builder container.
+    desc: Evaluate every flake output and the module checks (nix flake check --no-build) in the builder container.
     deps:
       - builder
     cmds:
-      - sudo {{.CONTAINER}} run --rm -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} nix flake check
+      # Without building, so that the NixOS tests are only evaluated. Run them with test:nixos.
+      - sudo {{.CONTAINER}} run --rm -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} nix flake check --no-build
+
+  test:nixos:
+    desc: Run every check, including the NixOS tests, in the builder container. Add TEST=<name> to run only one, for example TEST=profile-minimal.
+    deps:
+      - builder
+    cmds:
+      # Privileged, because the tests start systemd-nspawn containers.
+      - |
+        sudo {{.CONTAINER}} run --rm --privileged -v {{.NIX_VOLUME}}:/nix -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} \
+          {{if .TEST}}nix build -L --no-link .#checks.x86_64-linux.{{.TEST}}{{else}}nix flake check -L{{end}}
+
+  test:nixos:interactive:
+    desc: Open the Python shell of one NixOS test to run its commands by hand, for example TEST=profile-minimal. Run start_all() first.
+    requires:
+      vars:
+        - TEST
+    deps:
+      - builder
+    interactive: true
+    cmds:
+      - |
+        sudo {{.CONTAINER}} run --rm -it --privileged -v {{.NIX_VOLUME}}:/nix -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} \
+          sh -c 'driver="$(nix build --no-link --print-out-paths .#checks.x86_64-linux.{{.TEST}}.driverInteractive)" && "${driver}/bin/nixos-test-driver" --interactive'
 
   vm:minimal:
     desc: Boot a copy of the minimal image in a QEMU virtual machine.
@@ -105,7 +129,7 @@ tasks:
       - sudo {{.CONTAINER}} run --rm -v {{.NIX_VOLUME}}:/nix {{.BUILDER}} nix-collect-garbage
 
   cache:delete:
-    desc: Delete the Nix store volume. Required after changing build/Containerfile.
+    desc: Delete the Nix store volume. Required after changing the Nix version in build/Containerfile.
     cmds:
       - sudo {{.CONTAINER}} volume rm {{.NIX_VOLUME}}
 

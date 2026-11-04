@@ -1,5 +1,16 @@
 FROM docker.io/nixos/nix:2.34.8
 
-RUN echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf \
+# /etc/nix/nix.conf is a link into /nix/store, which the Nix store volume hides. Replace it with a file so that these settings stay in the image.
+# auto-allocate-uids, cgroups, and uid-range are for NixOS tests that start systemd-nspawn containers (checks/containers.nix).
+RUN cp --remove-destination "$(readlink -f /etc/nix/nix.conf)" /etc/nix/nix.conf \
+    && chmod u+w /etc/nix/nix.conf \
+    && echo "experimental-features = nix-command flakes auto-allocate-uids cgroups" >> /etc/nix/nix.conf \
+    && echo "auto-allocate-uids = true" >> /etc/nix/nix.conf \
+    && echo "extra-system-features = uid-range" >> /etc/nix/nix.conf \
     && echo "sandbox = true" >> /etc/nix/nix.conf \
     && git config --global --add safe.directory /workdir
+
+RUN mkdir -p /var \
+    && ln -s /run /var/run \
+    && printf 'NAME="nixsapOS builder"\nID=nixsapos-builder\n' > /etc/os-release \
+    && tr -d '-' < /proc/sys/kernel/random/uuid > /etc/machine-id

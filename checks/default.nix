@@ -83,3 +83,5 @@ in
     { nixsapos.productivity = { enable = true; selection = "unfree"; }; }
   ];
 }
+# NixOS tests that start the system in a container and check it.
+// import ./containers.nix { inherit self nixpkgs; }

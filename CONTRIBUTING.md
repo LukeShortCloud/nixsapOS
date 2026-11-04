@@ -32,7 +32,9 @@ The images are kept outside the repository on purpose. A `path:` flake reference
 | `go-task build:minimal` | Build the minimal image ([Podman](#podman)). |
 | `go-task build:secure` | Build the secure image ([Secure Image](#secure-image)). |
 | `go-task build:all` | Build both images, one after the other. |
-| `go-task check` | Run `nix flake check` in the builder container ([GitHub Actions](#github-actions)). |
+| `go-task check` | Evaluate the flake with `nix flake check --no-build` in the builder container ([GitHub Actions](#github-actions)). |
+| `go-task test:nixos` | Run the NixOS tests in `checks/` ([NixOS Tests](#nixos-tests)). |
+| `go-task test:nixos:interactive TEST=<NAME>` | Open the Python shell of one NixOS test ([NixOS Tests](#nixos-tests)). |
 | `go-task vm:minimal` and `go-task vm:secure` | Boot an image in a virtual machine ([Testing the Image](#testing-the-image)). |
 | `go-task test HOST=<USER>@<IP_ADDRESS>` | Run the runtime checks on a booted drive over SSH ([Testing the Image](#testing-the-image)). |
 | `go-task cache:clean` and `go-task cache:delete` | Free up space in the Nix store volume or delete it ([Build Cache](#build-cache)). |
@@ -92,7 +94,7 @@ The secure-image-only settings are in `modules/image/secure.nix`, apart from the
 
 The `nixsapos-nix` volume keeps the Nix store between builds. The first build downloads every package. Later builds only download and build what changed, for example about 2 minutes instead of 10.
 
-- Delete the volume after changing `build/Containerfile`, because the volume also holds the container's own copy of Nix: `go-task cache:delete`, `sudo podman volume rm nixsapos-nix` or `sudo docker volume rm nixsapos-nix`.
+- Delete the volume after changing the Nix version (`FROM`) in `build/Containerfile`, because the volume also holds the container's own copy of Nix: `go-task cache:delete`, `sudo podman volume rm nixsapos-nix` or `sudo docker volume rm nixsapos-nix`.
 - Free up space by removing old packages from the volume: `go-task cache:clean`, or add `nix-collect-garbage` instead of `nix run .#nixsapos-build` to the end of the `run` command.
 - Leave out `-v nixsapos-nix:/nix` to build without a cache.
 
@@ -160,11 +162,32 @@ sshd is installed but does not start by default. Start it on the drive first wit
 $ go-task test HOST=nixsap@localhost SSH_PORT=2222
 ```
 
+### NixOS Tests
+
+`checks/containers.nix` has NixOS tests (`pkgs.testers.runNixOSTest`). Each one starts nixsapOS in a systemd-nspawn container and runs a Python test script against it. Run all of them, or one, in the builder container:
+
+```
+$ go-task test:nixos
+```
+```
+$ go-task test:nixos TEST=profile-minimal
+```
+
+The container runs with `--privileged` because the tests start their own containers. The builder container image has the Nix settings that they need: `auto-allocate-uids`, `cgroups` and `uid-range`.
+
+A test passes once and is cached. It runs again after a change to anything that it uses. To run its commands by hand, open its Python shell, then run `start_all()` and commands such as `machine.succeed("id nixsap")`:
+
+```
+$ go-task test:nixos:interactive TEST=profile-minimal
+```
+
+Containers cannot run setuid programs such as `sudo`, mount file systems, or use hardware. The tests accept the services that fail for these reasons and list them in `container_failures`. Kernel, drive and boot settings need the image (see above).
+
 ## GitHub Actions
 
 Workflows are in `.github/workflows/`. They use the same builder container as local builds.
 
-- `check.yml` runs `nix flake check` on every push and pull request. It evaluates every flake output and runs the checks for the reusable modules in `checks/`. It does not build the image. Run the same check locally with `go-task check`.
+- `check.yml` runs `nix flake check --no-build` on every push and pull request. It evaluates every flake output and every check in `checks/`. It builds neither the image nor the NixOS tests. Run the same check locally with `go-task check`.
 - `image.yml` builds both images, minimal and secure, with the same `docker run` command as a local build, on every push that changes more than Markdown files. It builds them one after the other. It checks that the images build. It does not upload them.
 
 ### Testing Workflows Locally

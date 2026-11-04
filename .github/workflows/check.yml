@@ -12,6 +12,6 @@ jobs:
       # Use the same container and Nix version as local builds.
       - name: Create the builder container image
         run: docker build -t nixsapos-builder -f build/Containerfile build/
-      # Evaluate every output and run the reusable module checks. This does not build the image.
+      # Evaluate every output and the checks. This builds neither the image nor the NixOS tests.
       - name: Check the flake
-        run: docker run --rm -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix flake check
+        run: docker run --rm -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix flake check --no-build
