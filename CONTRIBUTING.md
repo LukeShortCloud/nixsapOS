@@ -164,13 +164,13 @@ $ go-task test HOST=nixsap@localhost SSH_PORT=2222
 
 ### NixOS Tests
 
-`checks/containers.nix` has NixOS tests (`pkgs.testers.runNixOSTest`). Each one starts nixsapOS in a systemd-nspawn container and runs a Python test script against it. Run all of them, or one, in the builder container:
+`checks/containers.nix` has NixOS tests (`pkgs.testers.runNixOSTest`). Each one starts nixsapOS in a systemd-nspawn container and runs a Python test script against it. There is one test for the profile and one for each feature module and `selection` level. Each checks the commands, services and generated files of its level, and that the commands of higher levels are missing. Run all of them, or one, in the builder container:
 
 ```
 $ go-task test:nixos
 ```
 ```
-$ go-task test:nixos TEST=profile-minimal
+$ go-task test:nixos TEST=container-profile-minimal
 ```
 
 The container runs with `--privileged` because the tests start their own containers. The builder container image has the Nix settings that they need: `auto-allocate-uids`, `cgroups` and `uid-range`.
@@ -178,10 +178,10 @@ The container runs with `--privileged` because the tests start their own contain
 A test passes once and is cached. It runs again after a change to anything that it uses. To run its commands by hand, open its Python shell, then run `start_all()` and commands such as `machine.succeed("id nixsap")`:
 
 ```
-$ go-task test:nixos:interactive TEST=profile-minimal
+$ go-task test:nixos:interactive TEST=container-profile-minimal
 ```
 
-Containers cannot run setuid programs such as `sudo`, mount file systems, or use hardware. The tests accept the services that fail for these reasons and list them in `container_failures`. Kernel, drive and boot settings need the image (see above).
+Containers cannot run setuid programs such as `sudo`, mount file systems, or use hardware. The tests accept the services that fail for these reasons and list them in `container_failures`. For hardware daemons, the tests only check that they start at boot. The tests have no network. RetroDECK is installed from an offline stand-in for Flathub (`testFlathub`) with a tiny app of the same ID, so the test checks the Flatpak install itself. `scripts/nixsapos-tests.sh` checks the real RetroDECK on a booted drive with the `unfree` gaming applications. Boot, kernel, and storage settings need the image.
 
 ## GitHub Actions
 

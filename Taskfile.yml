@@ -77,7 +77,7 @@ tasks:
       - sudo {{.CONTAINER}} run --rm -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} nix flake check --no-build
 
   test:nixos:
-    desc: Run every check, including the NixOS tests, in the builder container. Add TEST=<name> to run only one, for example TEST=profile-minimal.
+    desc: Run every check, including the NixOS tests, in the builder container. Add TEST=<name> to run only one, for example TEST=container-profile-minimal.
     deps:
       - builder
     cmds:
@@ -87,7 +87,7 @@ tasks:
           {{if .TEST}}nix build -L --no-link .#checks.x86_64-linux.{{.TEST}}{{else}}nix flake check -L{{end}}
 
   test:nixos:interactive:
-    desc: Open the Python shell of one NixOS test to run its commands by hand, for example TEST=profile-minimal. Run start_all() first.
+    desc: Open the Python shell of one NixOS test to run its commands by hand, for example TEST=container-profile-minimal. Run start_all() first.
     requires:
       vars:
         - TEST

@@ -93,6 +93,13 @@ echo "Testing the services..."
 check_equal "the fwupd refresh timer is masked" "$(systemctl is-enabled fwupd-refresh.timer)" "masked"
 check_equal "nothing listens on the rpcbind port (111)" "$(ss --listening --tcp --udp --numeric --no-header "sport = :111")" ""
 check "the Flathub remote exists" grep -qx flathub <<< "$(flatpak remotes --system --columns=name)"
+# Only the "unfree" gaming applications install RetroDECK. The install script lists the Flatpaks to install.
+# It downloads several GB after the first boot. Wait for it to finish first.
+flatpak_install_script="$(systemctl show --property=ExecStart --value flatpak-managed-install.service | grep -o "/nix/store/[^ ;]*" | head -n 1)"
+if [[ -n "${flatpak_install_script}" ]] && grep -q net.retrodeck.retrodeck "${flatpak_install_script}"; then
+    check_equal "the Flatpak install service finished" "$(systemctl show --property=ActiveState --value flatpak-managed-install.service)/$(systemctl show --property=Result --value flatpak-managed-install.service)" "inactive/success"
+    check "RetroDECK is installed from Flathub" grep -qx flathub <<< "$(flatpak info --system --show-origin net.retrodeck.retrodeck 2>/dev/null)"
+fi
 
 echo "Testing /etc/nixos..."
 for file in configuration.nix flake.lock flake.nix; do
