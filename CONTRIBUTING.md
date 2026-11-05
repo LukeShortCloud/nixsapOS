@@ -39,7 +39,7 @@ The images are kept outside the repository on purpose. A `path:` flake reference
 | `go-task test HOST=<USER>@<IP_ADDRESS>` | Run the runtime checks on a booted drive over SSH ([Testing the Image](#testing-the-image)). |
 | `go-task cache:clean` and `go-task cache:delete` | Free up space in the Nix store volume or delete it ([Build Cache](#build-cache)). |
 | `go-task update:inputs` | Update the flake inputs in `flake.lock`. |
-| `go-task act:check` and `go-task act:build` | Run the workflows locally ([Testing Workflows Locally](#testing-workflows-locally)). |
+| `go-task act:check`, `go-task act:tests` and `go-task act:build` | Run the workflows locally ([Testing Workflows Locally](#testing-workflows-locally)). |
 
 The tasks use Podman when it is installed. Add `CONTAINER=docker` to use Docker instead, for example `go-task build:minimal CONTAINER=docker`.
 
@@ -148,7 +148,7 @@ The manual command is `scripts/nixsapos-test-vm.sh`.
 
 It never changes `~/.cache/nixsapos/nixsapos.img`. It boots a copy in `~/.cache/nixsapos/vm/`, grown to 32 GB like a bigger USB drive, with empty UEFI variables like a new PC. The comments at the top of the script list its settings.
 
-`scripts/nixsapos-tests.sh` checks a booted drive after its first boot: the partitions, mounts, services, kernel parameters, and an offline rebuild of `/etc/nixos`. It knows the differences between the minimal and secure images. It prints one PASS or FAIL line per check. Its exit code is the number of failed checks. `nix flake check` already covers the configuration itself, so the script only checks what shows at runtime.
+`scripts/nixsapos-tests.sh` checks a booted drive after its first boot: the partitions, mounts, services, kernel parameters, and an offline rebuild of `/etc/nixos`. It knows the differences between the minimal and secure images. It prints one PASS or FAIL line per check. Its exit code is the number of failed checks. `nix flake check` already covers the configuration itself. The script only checks what shows at runtime.
 
 Run it on the drive itself with `sudo scripts/nixsapos-tests.sh`, or from another computer over SSH:
 
@@ -183,13 +183,13 @@ A test passes once and is cached. It runs again after a change to anything that 
 $ go-task test:nixos:interactive TEST=container-profile-minimal
 ```
 
-Containers cannot run setuid programs such as `sudo`, mount file systems, or use hardware. The tests accept the services that fail for these reasons and list them in `container_failures`. For hardware daemons, the tests only check that they start at boot. The tests have no network. RetroDECK is installed from an offline stand-in for Flathub (`testFlathub`) with a tiny app of the same ID, so the test checks the Flatpak install itself. `scripts/nixsapos-tests.sh` checks the real RetroDECK on a booted drive with the `unfree` gaming applications. Boot, kernel, and storage settings need the image.
+Containers cannot run setuid programs such as `sudo`, mount file systems, or use hardware. The tests accept the services that fail for these reasons and list them in `container_failures`. For hardware daemons, the tests only check that they start at boot. The tests have no network. RetroDECK is installed from an offline stand-in for Flathub (`testFlathub`) with a tiny app of the same ID. The test checks the Flatpak install itself. `scripts/nixsapos-tests.sh` checks the real RetroDECK on a booted drive with the `unfree` gaming applications. Boot, kernel, and storage settings need the image.
 
 ## GitHub Actions
 
 Workflows are in `.github/workflows/`. They use the same builder container as local builds.
 
-- `check.yml` runs `nix flake check --no-build` on every push and pull request. It evaluates every flake output and every check in `checks/`. It builds neither the image nor the NixOS tests. Run the same check locally with `go-task check`.
+- `check.yml` runs `nix flake check --no-build` on every push and pull request. It evaluates every flake output and every check in `checks/`. It builds neither the image nor the NixOS tests. Run the same check locally with `go-task check`. After it passes, a second job runs every container test (the `containers` check), the same as `go-task test:nixos TEST=containers`. The runners have no KVM. The virtual machine tests only run locally.
 - `image.yml` builds both images, minimal and secure, with the same `docker run` command as a local build, on every push that changes more than Markdown files. It builds them one after the other. It checks that the images build. It does not upload them.
 
 ### Testing Workflows Locally
@@ -217,3 +217,5 @@ sudo systemctl stop podman.socket
 
 - The images are written to `nixsapos-output/` next to the repository (`../nixsapos-output/`), the same place as on GitHub. Both use the rootful `nixsapos-nix` cache volume.
 - act sets the `ACT` environment variable. The image workflow uses it to skip freeing disk space, which only makes sense on GitHub (act mounts its own tool cache).
+
+`go-task act:tests` runs the container tests job the same way, because the tests also need a privileged container. It runs the check job first. The tests use the files that git knows about. Add new files with `git add` first.

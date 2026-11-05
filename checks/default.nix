@@ -84,6 +84,14 @@ in
   ];
 }
 # NixOS tests that start the system in a container and check it.
-// import ./containers.nix { inherit self nixpkgs; }
+// (
+  let
+    containerTests = import ./containers.nix { inherit self nixpkgs; };
+  in
+  containerTests // {
+    # All container tests in one check, for GitHub Actions. It has no KVM for the virtual machine tests.
+    containers = pkgs.linkFarmFromDrvs "containers" (builtins.attrValues containerTests);
+  }
+)
 # NixOS tests that start the system in a virtual machine for additional hardware support.
 // import ./vms.nix { inherit self nixpkgs; }

@@ -157,3 +157,14 @@ tasks:
       - sudo systemctl start podman.socket
       - defer: sudo systemctl stop podman.socket
       - sudo DOCKER_HOST="unix:///run/podman/podman.sock" "{{.ACT}}/bin/act" push --job build --bind -P {{.ACT_RUNNER}}
+
+  act:tests:
+    desc: Run the container tests job of the check workflow locally with act and rootful Podman.
+    vars:
+      ACT:
+        sh: nix --extra-experimental-features 'nix-command flakes' build --no-link --print-out-paths --inputs-from "git+file://{{.ROOT_DIR}}" nixpkgs#act
+    cmds:
+      - sudo systemctl start podman.socket
+      - defer: sudo systemctl stop podman.socket
+      # Rootful, because the tests need a privileged container. --bind, because that container mounts the repository from the host.
+      - sudo DOCKER_HOST="unix:///run/podman/podman.sock" "{{.ACT}}/bin/act" push --job container-tests --bind -P {{.ACT_RUNNER}}

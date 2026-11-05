@@ -15,3 +15,24 @@ jobs:
       # Evaluate every output and the checks. This builds neither the image nor the NixOS tests.
       - name: Check the flake
         run: docker run --rm -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix flake check --no-build
+  container-tests:
+    name: NixOS container tests
+    # Only after the flake evaluates, because these tests download about 25 GB.
+    needs: check
+    runs-on: ubuntu-24.04
+    steps:
+      # The tests need about 25 GB in the Nix store.
+      - name: Free disk space
+        # Skip this when testing locally with act, which sets ACT and mounts its own tool cache.
+        if: ${{ !env.ACT }}
+        run: |
+          df -h /
+          sudo rm -rf /opt/ghc /opt/hostedtoolcache /usr/local/lib/android /usr/share/dotnet
+          df -h /
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Create the builder container image
+        run: docker build -t nixsapos-builder -f build/Containerfile build/
+      # The same command as `go-task test:nixos TEST=containers`.
+      # Privileged, because the tests start systemd-nspawn containers. The virtual machine tests need KVM, which the runners do not have.
+      - name: Run the container tests
+        run: docker run --rm --privileged -v nixsapos-nix:/nix -v "${GITHUB_WORKSPACE}":/workdir -w /workdir nixsapos-builder nix build -L --keep-going --no-link .#checks.x86_64-linux.containers
