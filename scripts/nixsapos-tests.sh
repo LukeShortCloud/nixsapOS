@@ -92,6 +92,9 @@ done
 echo "Testing the services..."
 check_equal "the fwupd refresh timer is masked" "$(systemctl is-enabled fwupd-refresh.timer)" "masked"
 check_equal "nothing listens on the rpcbind port (111)" "$(ss --listening --tcp --udp --numeric --no-header "sport = :111")" ""
+if [[ "$(systemctl is-enabled automatic-timezoned.service 2>/dev/null)" == "enabled" ]]; then
+    check "the automatic time zone service is running" systemctl is-active --quiet automatic-timezoned.service
+fi
 check "the Flathub remote exists" grep -qx flathub <<< "$(flatpak remotes --system --columns=name)"
 # Only the "unfree" gaming applications install RetroDECK. The install script lists the Flatpaks to install.
 # It downloads several GB after the first boot. Wait for it to finish first.

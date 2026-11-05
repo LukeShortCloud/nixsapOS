@@ -89,6 +89,12 @@ in
       with subtest("KWallet is off"):
           machine.succeed("grep -qx Enabled=false /etc/xdg/kwalletrc")
 
+      with subtest("the time zone is set automatically"):
+          services_enabled("automatic-timezoned.service")
+          # The time zone can be changed at runtime. /etc/localtime is not a link into the Nix store.
+          machine.succeed("timedatectl set-timezone America/Denver")
+          machine.succeed("test \"$(timedatectl show --property=Timezone --value)\" = America/Denver")
+
       with subtest("the applications are at the minimal level"):
           commands_exist("git", "kalk", "keepassxc", "mangohud", "vim")
           commands_missing(*${pythonList (gamingFree ++ productivityFree)})

@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 
 {
   # Shown in the boot menu, /etc/os-release and the TTY login. The ID stays "nixos" for tools that check it.
@@ -11,4 +11,8 @@
     # Use the same keyboard layout as the desktop.
     useXkbConfig = true;
   };
+
+  # Set the time zone from the location. GeoClue finds it from the nearby Wi-Fi networks.
+  # It changes as soon as the location changes and is not affected by a VPN.
+  services.automatic-timezoned.enable = lib.mkDefault true;
 }

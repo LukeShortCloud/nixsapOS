@@ -4,7 +4,9 @@
   # Settings for this computer. They stay the same when switching to another NixOS-based distribution.
   i18n.defaultLocale = "en_US.UTF-8";
   networking.hostName = "nixsapos";
-  time.timeZone = "UTC";
+  # The time zone is set automatically from the location. Alternatively, manually set it here:
+  # services.automatic-timezoned.enable = false;
+  # time.timeZone = "America/New_York";
 
   users.users.nixsap = {
     extraGroups = [
