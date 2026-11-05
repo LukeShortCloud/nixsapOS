@@ -81,7 +81,7 @@ tasks:
     deps:
       - builder
     cmds:
-      # Privileged, because the tests start systemd-nspawn containers.
+      # Privileged, because the tests start systemd-nspawn containers and QEMU virtual machines (/dev/kvm).
       - |
         sudo {{.CONTAINER}} run --rm --privileged -v {{.NIX_VOLUME}}:/nix -v "{{.ROOT_DIR}}":/workdir -w /workdir {{.BUILDER}} \
           {{if .TEST}}nix build -L --no-link .#checks.x86_64-linux.{{.TEST}}{{else}}nix flake check -L{{end}}

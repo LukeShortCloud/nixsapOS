@@ -85,3 +85,5 @@ in
 }
 # NixOS tests that start the system in a container and check it.
 // import ./containers.nix { inherit self nixpkgs; }
+# NixOS tests that start the system in a virtual machine for additional hardware support.
+// import ./vms.nix { inherit self nixpkgs; }

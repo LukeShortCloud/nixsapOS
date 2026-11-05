@@ -173,7 +173,9 @@ $ go-task test:nixos
 $ go-task test:nixos TEST=container-profile-minimal
 ```
 
-The container runs with `--privileged` because the tests start their own containers. The builder container image has the Nix settings that they need: `auto-allocate-uids`, `cgroups` and `uid-range`.
+`checks/vms.nix` has the tests that need their own kernel, udev and drives. They start a QEMU virtual machine and need KVM. GitHub Actions runners have no KVM on free accounts. Run these tests locally. `vm-image-minimal` checks the kernel parameters, the I/O scheduler of extra NVMe, SATA and USB drives, the journal in RAM, `/tmp`, zram and the login screen. `vm-kernel-modules` checks that the Razer and Xbox controller drivers load at `unfree`. The virtual machine boots the kernel directly from a test drive. The image's boot loader, partitions and root file system are only checked by the image tests (see above).
+
+The container runs with `--privileged` because the tests start their own containers and virtual machines. The builder container image has the Nix settings that they need: `auto-allocate-uids`, `cgroups` and `uid-range`.
 
 A test passes once and is cached. It runs again after a change to anything that it uses. To run its commands by hand, open its Python shell, then run `start_all()` and commands such as `machine.succeed("id nixsap")`:
 
