@@ -21,7 +21,8 @@ let
       virtualisation.memorySize = 4096;
     };
     testScript = ''
-      machine.wait_for_unit("multi-user.target")
+      # A unit that waits for missing hardware, such as a hypervisor device, delays the boot by minutes.
+      machine.wait_for_unit("multi-user.target", timeout=120)
 
       ${testScript}
 
@@ -44,6 +45,12 @@ in
           "-blockdev driver=null-co,node-name=sata0,size=1073741824,read-zeroes=on"
           "-device ahci,id=sata"
           "-device ide-hd,bus=sata.0,drive=sata0"
+          # The ports of the QEMU guest agent and SPICE, with nothing connected on the host.
+          "-device virtio-serial,id=serial0"
+          "-chardev null,id=qga0"
+          "-device virtserialport,bus=serial0.0,chardev=qga0,name=org.qemu.guest_agent.0"
+          "-chardev null,id=spice0"
+          "-device virtserialport,bus=serial0.0,chardev=spice0,name=com.redhat.spice.0"
         ];
       }
     ];
@@ -70,6 +77,12 @@ in
           machine.succeed("swapon --show=NAME --noheadings | grep -q zram")
           machine.succeed("grep -q '\\[lz4\\]' /sys/block/zram0/comp_algorithm")
           machine.succeed("test \"$(sysctl --values vm.swappiness)\" = 180")
+
+      with subtest("only the QEMU guest tools start"):
+          machine.wait_for_unit("qemu-guest-agent.service")
+          machine.wait_for_unit("spice-vdagentd.service")
+          for unit in ["virtualbox.service", "vmware.service", "hv-kvp.service", "xe-daemon.service", "xe-linux-distribution.service"]:
+              machine.fail(f"systemctl is-active {unit}")
 
       with subtest("the login screen starts"):
           machine.wait_for_unit("display-manager.service")
