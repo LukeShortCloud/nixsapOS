@@ -82,6 +82,25 @@ in
     self.nixosModules.productivity
     { nixsapos.productivity = { enable = true; selection = "unfree"; }; }
   ];
+
+  # A configuration.nix without an administrator fails the build, for example one from before users moved into it.
+  image-no-administrator =
+    let
+      system = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          self.nixosModules.default
+          self.nixosModules.image
+          {
+            nixsapos.image.encryption.enable = false;
+            system.stateVersion = "26.05";
+          }
+        ];
+      };
+      failed = builtins.filter (assertion: !assertion.assertion) system.config.assertions;
+    in
+    assert nixpkgs.lib.any (assertion: nixpkgs.lib.hasPrefix "No normal user is an administrator" assertion.message) failed;
+    pkgs.writeText "check-image-no-administrator" "";
 }
 # NixOS tests that start the system in a container and check it.
 // (
